@@ -1,3 +1,4 @@
+require "net/http"
 module Kauperts
   class LinkChecker
 
@@ -5,6 +6,10 @@ module Kauperts
 
     def initialize(object)
       object.respond_to?(:url) ? @object = object : raise(ArgumentError.new("object doesn't respond to url"))
+    end
+
+    def check!
+
     end
 
   end

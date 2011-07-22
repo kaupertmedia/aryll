@@ -17,19 +17,20 @@ class LinkCheckerTest < ActiveSupport::TestCase
   end
 
   test "should have check! method" do
-    url = url_object
-    obj = checker.new(url)
+    obj = checker.new(url_object)
     assert_respond_to obj, :check!
   end
 
   test "should return status array with 200" do
     stub_net_http!
+    url = url_object
     obj = checker.new(url)
     assert_equal [url, "200"], obj.check!
   end
 
   test "should return status array with 404" do
     stub_net_http!
+    url = url_object
     obj = checker.new(url)
     assert_equal [url, "200"], obj.check!
   end
