@@ -1,9 +1,8 @@
 $:.push File.expand_path("../lib/", __FILE__)
-require 'version'
 
 Gem::Specification.new do |s|
   s.name = "kauperts_link_checker"
-  s.version = Kauperts::LinkChecker::VERSION
+  s.version = "0.0.2"
   s.platform = Gem::Platform::RUBY
   s.authors = ["Wolfgang Vogl", "Carsten Zimmermann"]
   s.email = ["w.vogl@kaupertmedia.de"]

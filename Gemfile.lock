@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    kauperts_link_checker (0.0.1)
+    kauperts_link_checker (0.0.2)
 
 GEM
   remote: http://rubygems.org/
