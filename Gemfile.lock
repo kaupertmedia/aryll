@@ -1,0 +1,21 @@
+PATH
+  remote: .
+  specs:
+    kauperts_link_checker (0.0.1)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    activesupport (2.3.11)
+    mocha (0.9.12)
+    redgreen (1.2.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activesupport
+  bundler
+  kauperts_link_checker!
+  mocha
+  redgreen
