@@ -1,16 +1,24 @@
 require "net/https"
 require 'simpleidn'
 module Kauperts
+
+  # Checks the status of an object which responds to +url+. The returned
+  # status can be accessed via +status+. It contains either a string
+  # representation of a numeric http status code or an error message.
+  #
+  # Supports HTTPS and IDN-domains.
   class LinkChecker
 
     attr_reader :object, :status
 
+    # === Parameters
+    # * +object+: an arbitrary object which responds to +url+.
     def initialize(object)
       object.respond_to?(:url) ? @object = object : raise(ArgumentError.new("object doesn't respond to url"))
     end
 
+    # Checks the associated url object. Sets and returns +status+
     def check!
-
       begin
         uri = parsed_uri(@object.url)
         if uri.scheme == 'https'
@@ -28,15 +36,24 @@ module Kauperts
         status = "Netzwerkfehler (#{e.message})"
       end
       @status = status
-      [@object, @status]
     end
 
+    # Returns +true+ if a check has been run and the return code was '200 OK'
     def ok?
       @status == '200'
     end
 
+    # Immediately checks +object+ and returns the LinkChecker instance
+    def self.check!(object)
+      checker = new(object)
+      checker.check!
+      checker
+    end
+
     protected
 
+    # Transforms a possible IDN within +url+ into ASCII and returns
+    # a parsed URI instance.
     def parsed_uri(url)
       url_without_protocol = /^http[s]?:\/\/(.+)/.match(url)[1]
       domain = url_without_protocol.split('/', 2)[0]

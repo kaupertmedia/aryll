@@ -26,14 +26,14 @@ class LinkCheckerTest < ActiveSupport::TestCase
     url = url_object
     obj = checker.new(url)
     a = obj.check!
-    assert_equal [url, "200"], obj.check!
+    assert_equal "200", obj.check!
   end
 
   test "should return status array with 404" do
     stub_net_http!("404")
     url = url_object
     obj = checker.new(url)
-    assert_equal [url, "404"], obj.check!
+    assert_equal "404", obj.check!
   end
 
   test "should handle time out exceptions" do
@@ -42,10 +42,8 @@ class LinkCheckerTest < ActiveSupport::TestCase
     obj = checker.new(url)
     assert_nothing_raised do
       status = obj.check!
-      assert_kind_of Array, status
-      assert status.size == 2
-      assert_equal url, status.first
-      assert_match /Zeitüberschreitung (.+)/, status.last
+      assert_kind_of String, status
+      assert_match /Zeitüberschreitung (.+)/, status
     end
   end
 
@@ -56,10 +54,8 @@ class LinkCheckerTest < ActiveSupport::TestCase
     obj = checker.new(url)
     assert_nothing_raised do
       status = obj.check!
-      assert_kind_of Array, status
-      assert status.size == 2
-      assert_equal url, status.first
-      assert_match /Netzwerkfehler (.+)/, status.last
+      assert_kind_of String, status
+      assert_match /Netzwerkfehler (.+)/, status
     end
   end
 
@@ -68,14 +64,14 @@ class LinkCheckerTest < ActiveSupport::TestCase
     stub_net_http!
     url = url_object('http://www.trotzköpfchen.de')
     obj = checker.new(url)
-    assert_equal [url, "200"], obj.check!
+    assert_equal "200", obj.check!
   end
 
   test "should handle ssl protocol" do
     stub_net_http!
     url = url_object(nil, "https")
     obj = checker.new(url)
-    assert_equal [url, "200"], obj.check!
+    assert_equal "200", obj.check!
   end
 
   test "should have status" do
@@ -96,6 +92,16 @@ class LinkCheckerTest < ActiveSupport::TestCase
     assert !obj.ok?
     obj.check!
     assert obj.ok?
+  end
+
+  test "should check directly when called from class" do
+    stub_net_http!
+    url = url_object
+    assert_respond_to checker, :check!
+    assert_raises ArgumentError do
+      checker.check!
+    end
+    assert_kind_of checker, checker.check!(url)
   end
 
   protected
