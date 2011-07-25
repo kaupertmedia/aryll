@@ -25,30 +25,61 @@ class LinkCheckerTest < ActiveSupport::TestCase
     stub_net_http!
     url = url_object
     obj = checker.new(url)
+    a = obj.check!
     assert_equal [url, "200"], obj.check!
   end
 
   test "should return status array with 404" do
-    stub_net_http!
+    stub_net_http!("404")
     url = url_object
+    obj = checker.new(url)
+    assert_equal [url, "404"], obj.check!
+  end
+
+  test "should handle time out exceptions" do
+    stub_net_http_error!(Timeout::Error, "Dauert zu lange")
+    url = url_object
+    obj = checker.new(url)
+    assert_nothing_raised do
+      status = obj.check!
+      assert_kind_of Array, status
+      assert status.size == 2
+      assert_equal url, status.first
+      assert_match /Zeitüberschreitung (.+)/, status.last
+    end
+  end
+
+  test "should handle generic network problem" do
+    class GenericNetworkException < Exception; end
+    stub_net_http_error!(GenericNetworkException, "Irgendwie kaputt")
+    url = url_object
+    obj = checker.new(url)
+    assert_nothing_raised do
+      status = obj.check!
+      assert_kind_of Array, status
+      assert status.size == 2
+      assert_equal url, status.first
+      assert_match /Netzwerkfehler (.+)/, status.last
+    end
+  end
+
+  test "should sanitize international domain names through simpleidn" do
+
+  end
+
+  test "should handle domain with umlauts" do
+    SimpleIDN.expects(:to_ascii).returns('www.xn--trotzkpfchen-9ib.de').at_least(1)
+    stub_net_http!
+    url = url_object('http://www.trotzköpfchen.de')
     obj = checker.new(url)
     assert_equal [url, "200"], obj.check!
   end
 
-  test "should handle time out exceptions" do
-    flunk "TODO"
-  end
-
-  test "should handle generice network problem" do
-    flunk "TODO"
-  end
-
-  test "should handle domain with umlauts" do
-    flunk "TODO"
-  end
-
   test "should handle ssl protocol" do
-    flunk "TODO"
+    stub_net_http!
+    url = url_object(nil, "https")
+    obj = checker.new(url)
+    assert_equal [url, "200"], obj.check!
   end
 
   protected
@@ -64,9 +95,13 @@ class LinkCheckerTest < ActiveSupport::TestCase
     Net::HTTP.stubs(:get_response).returns(mock_response)
   end
 
-  def url_object(url = nil)
+  def stub_net_http_error!(exception, message)
+    Net::HTTP.stubs(:get_response).raises(exception, message)
+  end
+
+  def url_object(url = nil, protocol = 'http')
     obj = mock('url_object')
-    url ||= 'http://www.google.de'
+    url = "#{protocol}://www.google.com"
     obj.stubs(:url).returns(url)
     obj
   end

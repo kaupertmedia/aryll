@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     kauperts_link_checker (0.0.2)
+      simpleidn
 
 GEM
   remote: http://rubygems.org/
@@ -9,6 +10,7 @@ GEM
     activesupport (2.3.11)
     mocha (0.9.12)
     redgreen (1.2.2)
+    simpleidn (0.0.1)
 
 PLATFORMS
   ruby
