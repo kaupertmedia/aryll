@@ -63,10 +63,6 @@ class LinkCheckerTest < ActiveSupport::TestCase
     end
   end
 
-  test "should sanitize international domain names through simpleidn" do
-
-  end
-
   test "should handle domain with umlauts" do
     SimpleIDN.expects(:to_ascii).returns('www.xn--trotzkpfchen-9ib.de').at_least(1)
     stub_net_http!
@@ -80,6 +76,26 @@ class LinkCheckerTest < ActiveSupport::TestCase
     url = url_object(nil, "https")
     obj = checker.new(url)
     assert_equal [url, "200"], obj.check!
+  end
+
+  test "should have status" do
+    stub_net_http!
+    url = url_object
+    obj = checker.new(url)
+    assert_respond_to obj, :status
+    assert_nil obj.status
+    obj.check!
+    assert_not_nil obj.status
+  end
+
+  test "should have ok? method" do
+    stub_net_http!
+    url = url_object
+    obj = checker.new(url)
+    assert_respond_to obj, :ok?
+    assert !obj.ok?
+    obj.check!
+    assert obj.ok?
   end
 
   protected

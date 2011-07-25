@@ -3,7 +3,7 @@ require 'simpleidn'
 module Kauperts
   class LinkChecker
 
-    attr_reader :object
+    attr_reader :object, :status
 
     def initialize(object)
       object.respond_to?(:url) ? @object = object : raise(ArgumentError.new("object doesn't respond to url"))
@@ -27,7 +27,12 @@ module Kauperts
       rescue Exception => e
         status = "Netzwerkfehler (#{e.message})"
       end
-      [@object, status]
+      @status = status
+      [@object, @status]
+    end
+
+    def ok?
+      @status == '200'
     end
 
     protected
