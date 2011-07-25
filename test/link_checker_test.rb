@@ -37,25 +37,25 @@ class LinkCheckerTest < ActiveSupport::TestCase
   end
 
   test "should handle time out exceptions" do
-    stub_net_http_error!(Timeout::Error, "Dauert zu lange")
+    stub_net_http_error!(Timeout::Error, "Takes way too long")
     url = url_object
     obj = checker.new(url)
     assert_nothing_raised do
       status = obj.check!
       assert_kind_of String, status
-      assert_match /Zeitüberschreitung (.+)/, status
+      assert_match /Timeout (.+)/, status
     end
   end
 
   test "should handle generic network problem" do
     class GenericNetworkException < Exception; end
-    stub_net_http_error!(GenericNetworkException, "Irgendwie kaputt")
+    stub_net_http_error!(GenericNetworkException, "Somehow broken")
     url = url_object
     obj = checker.new(url)
     assert_nothing_raised do
       status = obj.check!
       assert_kind_of String, status
-      assert_match /Netzwerkfehler (.+)/, status
+      assert_match /Generic network error (.+)/, status
     end
   end
 
@@ -102,6 +102,22 @@ class LinkCheckerTest < ActiveSupport::TestCase
       checker.check!
     end
     assert_kind_of checker, checker.check!(url)
+  end
+
+  test "should support I18n message for timeout error" do
+    I18n.expects(:t).with(:"kauperts.link_checker.errors.timeout", :default => "Timeout").returns('Zeitüberschreitung')
+    stub_net_http_error!(Timeout::Error, "Dauert zu lange")
+    url = url_object
+    assert_match /Zeitüberschreitung (.+)/, checker.check!(url).status
+  end
+
+
+  test "should support I18n message for generic network error" do
+    I18n.expects(:t).with(:"kauperts.link_checker.errors.generic_network", :default => "Generic network error").returns('Netzwerkfehler')
+    class GenericNetworkException < Exception; end
+    stub_net_http_error!(GenericNetworkException, "Irgendwie kaputt")
+    url = url_object
+    assert_match /Netzwerkfehler (.+)/, checker.check!(url).status
   end
 
   protected

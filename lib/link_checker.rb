@@ -7,6 +7,11 @@ module Kauperts
   # representation of a numeric http status code or an error message.
   #
   # Supports HTTPS and IDN-domains.
+  #
+  #
+  # The following keys are used to translate error messages using the I18n gem:
+  # * <tt>kauperts.link_checker.errors.timeout</tt>: rescues from Timeout::Error
+  # * <tt>kauperts.link_checker.errors.generic_network</tt>: (currently) rescues from all other exceptions
   class LinkChecker
 
     attr_reader :object, :status
@@ -31,14 +36,14 @@ module Kauperts
         end
         status = response.code
       rescue Timeout::Error => e
-        status = "Zeitüberschreitung (#{e.message})"
+        status = "#{I18n.t :"kauperts.link_checker.errors.timeout", :default => "Timeout"} (#{e.message})"
       rescue Exception => e
-        status = "Netzwerkfehler (#{e.message})"
+        status = "#{I18n.t :"kauperts.link_checker.errors.generic_network", :default => "Generic network error"} (#{e.message})"
       end
       @status = status
     end
 
-    # Returns +true+ if a check has been run and the return code was '200 OK'
+    # Returns if a check has been run and the return code was '200 OK'
     def ok?
       @status == '200'
     end
