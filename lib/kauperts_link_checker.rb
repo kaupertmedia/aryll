@@ -1,5 +1,5 @@
 require "net/https"
-require 'simpleidn'
+require "simpleidn"
 module Kauperts
 
   # Checks the status of an object which responds to +url+. The returned
@@ -12,6 +12,7 @@ module Kauperts
   # The following keys are used to translate error messages using the I18n gem:
   # * <tt>kauperts.link_checker.errors.timeout</tt>: rescues from Timeout::Error
   # * <tt>kauperts.link_checker.errors.generic_network</tt>: (currently) rescues from all other exceptions
+  # * <tt>kauperts.link_checker.status.redirect_permanently</tt>: translation for 301 permanent redirects
   class LinkChecker
 
     attr_reader :object, :status
@@ -34,7 +35,11 @@ module Kauperts
         else
           response = Net::HTTP.get_response(uri)
         end
-        status = response.code
+        status = if response.code == '301'
+                   "#{I18n.t :"kauperts.link_checker.status.redirect_permanently", :default => "Moved permanently"} (#{response['location']})"
+                 else
+                   response.code
+                 end
       rescue Timeout::Error => e
         status = "#{I18n.t :"kauperts.link_checker.errors.timeout", :default => "Timeout"} (#{e.message})"
       rescue Exception => e

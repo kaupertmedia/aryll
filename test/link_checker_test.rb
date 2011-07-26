@@ -111,7 +111,6 @@ class LinkCheckerTest < ActiveSupport::TestCase
     assert_match /Zeitüberschreitung (.+)/, checker.check!(url).status
   end
 
-
   test "should support I18n message for generic network error" do
     I18n.expects(:t).with(:"kauperts.link_checker.errors.generic_network", :default => "Generic network error").returns('Netzwerkfehler')
     class GenericNetworkException < Exception; end
@@ -119,6 +118,21 @@ class LinkCheckerTest < ActiveSupport::TestCase
     url = url_object
     assert_match /Netzwerkfehler (.+)/, checker.check!(url).status
   end
+
+  test "should return redirection url" do
+    stub_net_http_redirect!
+    url = url_object
+    assert_match /auenland.de/, checker.check!(url).status
+  end
+
+  test "should support I18n message for 301 permanent redirects" do
+    I18n.expects(:t).with(:"kauperts.link_checker.status.redirect_permanently", :default => "Moved permanently").returns('Umgezogen')
+    location = "http://auenland.de"
+    stub_net_http_redirect!(301, location)
+    url = url_object
+    assert_match /Umgezogen \(#{location}\)/, checker.check!(url).status
+  end
+
 
   protected
 
@@ -135,6 +149,13 @@ class LinkCheckerTest < ActiveSupport::TestCase
 
   def stub_net_http_error!(exception, message)
     Net::HTTP.stubs(:get_response).raises(exception, message)
+  end
+
+  def stub_net_http_redirect!(return_code = '301', location ="http://auenland.de")
+    return_code = return_code.to_s
+    mock_response = {'location' => location}
+    mock_response.stubs(:code).returns(return_code)
+    Net::HTTP.stubs(:get_response).returns(mock_response)
   end
 
   def url_object(url = nil, protocol = 'http')

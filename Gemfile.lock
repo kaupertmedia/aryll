@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    kauperts_link_checker (0.2.2)
+    kauperts_link_checker (0.3.0)
       i18n
       simpleidn
 
