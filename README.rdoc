@@ -1,6 +1,6 @@
 == Kauperts::LinkChecker
 
-*Kauperts::LinkChecker* is a simple library to check for the well-being of URLs. It supports HTTPS and IDN URIs. 
+<b>Kauperts::LinkChecker</b> is a simple library to check for the well-being of URLs. It supports HTTPS and IDN URIs. 
 
 === Installation
 The gem is not published yet and can be installed from github:
@@ -26,9 +26,9 @@ The following keys are used to translate error messages using the I18n gem:
 * <tt>kauperts.link_checker.errors.generic_network</tt>: message when (currently) rescueing from all other exceptions
 
 === Credits
-*Kauperts::LinkChecker* is extracted from a maintenance task made for
+Kauperts::LinkChecker is extracted from a maintenance task made for
 {berlin.kauperts.de}[http://berlin.kauperts.de] by {kaupert media gmbh}[http://kaupertmedia.de].
 
 === License
-*Kauperts::LinkChecker* is released under a 3-clause BSD-licence. See the LICENSE file for details.
+Kauperts::LinkChecker is released under a 3-clause BSD-licence. See the LICENSE file for details.
 
