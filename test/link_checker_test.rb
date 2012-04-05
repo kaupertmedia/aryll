@@ -11,6 +11,21 @@ class LinkCheckerTest < ActiveSupport::TestCase
     end
   end
 
+	test "should instantiate with optional configuration hash" do
+		assert defined?(Kauperts::LinkChecker::Configuration)
+
+		obj = checker.new(url_object)
+		assert_respond_to obj, :configuration
+
+		assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
+		assert !obj.configuration.ignore_trailing_slash_redirects
+
+		obj = checker.new(url_object, :ignore_trailing_slash_redirects => true)
+
+		assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
+		assert_equal true, obj.configuration.ignore_trailing_slash_redirects
+	end
+
   test "should expose object" do
     obj = checker.new(url_object)
     assert_respond_to obj, :object
@@ -28,6 +43,20 @@ class LinkCheckerTest < ActiveSupport::TestCase
     a = obj.check!
     assert_equal "200", obj.check!
   end
+
+	test "should ignore permanent redirects with trailing slash only if told so" do
+		url = url_object("http://www.example.com/foo")
+		location = url.url + "/"
+		stub_net_http_redirect!("301", location)
+
+		obj = checker.new(url)
+		obj.check!
+		assert_equal false, obj.ok?
+
+		obj = checker.new(url, :ignore_trailing_slash_redirects => true)
+		obj.check!
+		assert_equal true, obj.ok?
+	end
 
   test "should return status array with 404" do
     stub_net_http!("404")

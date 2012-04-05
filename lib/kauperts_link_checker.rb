@@ -15,12 +15,26 @@ module Kauperts
   # * <tt>kauperts.link_checker.status.redirect_permanently</tt>: translation for 301 permanent redirects
   class LinkChecker
 
-    attr_reader :object, :status
+    attr_reader :configuration, :object, :status
+
+		class Configuration < Struct.new(:ignore_trailing_slash_redirects)
+		end
 
     # === Parameters
     # * +object+: an arbitrary object which responds to +url+.
-    def initialize(object)
+		# * +options+: optional configuration parameters, see below.
+		#
+		# === Available Options
+		# * +ignore_trailing_slash_redirects+: ignores redirects to the same URI but only with an added trailing slash (default: false)
+    def initialize(object, options = {})
       object.respond_to?(:url) ? @object = object : raise(ArgumentError.new("object doesn't respond to url"))
+
+			# Assign config variables
+			@configuration = Configuration.new
+			options = { :ignore_trailing_slash_redirects => false }.merge(options).each do |key, val|
+				@configuration.send(:"#{key}=", val)
+			end
+
     end
 
     # Checks the associated url object. Sets and returns +status+
@@ -36,6 +50,7 @@ module Kauperts
           response = Net::HTTP.get_response(uri)
         end
         status = if response.code == '301'
+                   @redirect_with_trailing_slash_only = "#{uri}/" == response['location']
                    "#{I18n.t :"kauperts.link_checker.status.redirect_permanently", :default => "Moved permanently"} (#{response['location']})"
                  else
                    response.code
@@ -49,8 +64,10 @@ module Kauperts
     end
 
     # Returns if a check has been run and the return code was '200 OK'
+    # or if a 301 permanent redirect only added a trailing slash
+    # while +ignore_trailing_slash_redirects+ has been set to true
     def ok?
-      @status == '200'
+      @status == '200' or (@redirect_with_trailing_slash_only == true and self.configuration.ignore_trailing_slash_redirects)
     end
 
     # Immediately checks +object+ and returns the LinkChecker instance
