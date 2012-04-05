@@ -68,7 +68,7 @@ class LinkCheckerTest < ActiveSupport::TestCase
   end
 
   test "should handle ssl protocol" do
-    stub_net_http!
+    stub_net_https!
     url = url_object(nil, "https")
     obj = checker.new(url)
     assert_equal "200", obj.check!
@@ -146,6 +146,13 @@ class LinkCheckerTest < ActiveSupport::TestCase
     mock_response.stubs(:code).returns(return_code)
     Net::HTTP.stubs(:get_response).returns(mock_response)
   end
+
+	def stub_net_https!(return_code = "200")
+    return_code = return_code.to_s
+    mock_response = mock('sslresponse')
+    mock_response.stubs(:code).returns(return_code)
+    Net::HTTP.any_instance.stubs(:start).returns(mock_response)
+	end
 
   def stub_net_http_error!(exception, message)
     Net::HTTP.stubs(:get_response).raises(exception, message)
