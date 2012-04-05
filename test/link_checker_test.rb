@@ -44,6 +44,20 @@ class LinkCheckerTest < ActiveSupport::TestCase
     assert_equal "200", obj.check!
   end
 
+	test "should ignore permanent redirects with trailing slash only if told so" do
+		url = url_object("http://www.example.com/foo")
+		location = url.url + "/"
+		stub_net_http_redirect!("301", location)
+
+		obj = checker.new(url)
+		obj.check!
+		assert_equal false, obj.ok?
+
+		obj = checker.new(url, :ignore_trailing_slash_redirects => true)
+		obj.check!
+		assert_equal true, obj.ok?
+	end
+
   test "should return status array with 404" do
     stub_net_http!("404")
     url = url_object

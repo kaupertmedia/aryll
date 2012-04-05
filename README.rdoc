@@ -20,6 +20,12 @@ It will check any object that responds to +url+:
     puts status 
   end
 
+You can ignore 301 permanent redirect that only add a trailing slash like this:
+  status = Kauperts::LinkChecker.check!(object_responding_to_url, :ignore_trailing_slash_redirects => true)
+  unless status.ok?
+    # A redirect from http://example.com/foo to http://example.com/foo/ will be considered ok
+  end
+
 === I18n
 The following keys are used to translate error messages using the I18n gem:
 * <tt>kauperts.link_checker.errors.timeout</tt>: message when rescueing from Timeout::Error

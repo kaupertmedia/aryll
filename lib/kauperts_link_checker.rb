@@ -50,6 +50,7 @@ module Kauperts
           response = Net::HTTP.get_response(uri)
         end
         status = if response.code == '301'
+                   @redirect_with_trailing_slash_only = "#{uri}/" == response['location']
                    "#{I18n.t :"kauperts.link_checker.status.redirect_permanently", :default => "Moved permanently"} (#{response['location']})"
                  else
                    response.code
@@ -63,8 +64,10 @@ module Kauperts
     end
 
     # Returns if a check has been run and the return code was '200 OK'
+    # or if a 301 permanent redirect only added a trailing slash
+    # while +ignore_trailing_slash_redirects+ has been set to true
     def ok?
-      @status == '200'
+      @status == '200' or (@redirect_with_trailing_slash_only == true and self.configuration.ignore_trailing_slash_redirects)
     end
 
     # Immediately checks +object+ and returns the LinkChecker instance
