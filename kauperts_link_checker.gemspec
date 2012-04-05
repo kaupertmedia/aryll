@@ -2,10 +2,10 @@ $:.push File.expand_path("../lib/", __FILE__)
 
 Gem::Specification.new do |s|
   s.name          = "kauperts_link_checker"
-  s.version       = "0.3.1"
+  s.version       = "0.4.0"
   s.platform      = Gem::Platform::RUBY
   s.authors       = ["Wolfgang Vogl", "Carsten Zimmermann"]
-  s.email         = ["w.vogl@kaupertmedia.de"]
+  s.email         = ["carp@hacksocke.de"]
   s.homepage      = ""
   s.summary       = "A simple library to check for the well-being of an URL"
   s.description   = "A simple library to check for the well-being of an URL"

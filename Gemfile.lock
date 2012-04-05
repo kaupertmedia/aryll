@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    kauperts_link_checker (0.3.0)
+    kauperts_link_checker (0.4.0)
       i18n
       simpleidn
 
@@ -9,10 +9,10 @@ GEM
   remote: http://rubygems.org/
   specs:
     activesupport (2.3.11)
-    i18n (0.5.0)
+    i18n (0.6.0)
     mocha (0.9.12)
     redgreen (1.2.2)
-    simpleidn (0.0.1)
+    simpleidn (0.0.3)
 
 PLATFORMS
   ruby
