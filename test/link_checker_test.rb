@@ -167,7 +167,7 @@ class LinkCheckerTest < ActiveSupport::TestCase
 
   def url_object(url = nil, protocol = 'http')
     obj = mock('url_object')
-    url = "#{protocol}://www.google.com"
+    url ||= "#{protocol}://www.google.com"
     obj.stubs(:url).returns(url)
     obj
   end
