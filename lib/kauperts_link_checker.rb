@@ -15,12 +15,26 @@ module Kauperts
   # * <tt>kauperts.link_checker.status.redirect_permanently</tt>: translation for 301 permanent redirects
   class LinkChecker
 
-    attr_reader :object, :status
+    attr_reader :configuration, :object, :status
+
+		class Configuration < Struct.new(:ignore_trailing_slash_redirects)
+		end
 
     # === Parameters
     # * +object+: an arbitrary object which responds to +url+.
-    def initialize(object)
+		# * +options+: optional configuration parameters, see below.
+		#
+		# === Available Options
+		# * +ignore_trailing_slash_redirects+: ignores redirects to the same URI but only with an added trailing slash (default: false)
+    def initialize(object, options = {})
       object.respond_to?(:url) ? @object = object : raise(ArgumentError.new("object doesn't respond to url"))
+
+			# Assign config variables
+			@configuration = Configuration.new
+			options = { :ignore_trailing_slash_redirects => false }.merge(options).each do |key, val|
+				@configuration.send(:"#{key}=", val)
+			end
+
     end
 
     # Checks the associated url object. Sets and returns +status+

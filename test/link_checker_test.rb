@@ -11,6 +11,21 @@ class LinkCheckerTest < ActiveSupport::TestCase
     end
   end
 
+	test "should instantiate with optional configuration hash" do
+		assert defined?(Kauperts::LinkChecker::Configuration)
+
+		obj = checker.new(url_object)
+		assert_respond_to obj, :configuration
+
+		assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
+		assert !obj.configuration.ignore_trailing_slash_redirects
+
+		obj = checker.new(url_object, :ignore_trailing_slash_redirects => true)
+
+		assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
+		assert_equal true, obj.configuration.ignore_trailing_slash_redirects
+	end
+
   test "should expose object" do
     obj = checker.new(url_object)
     assert_respond_to obj, :object
