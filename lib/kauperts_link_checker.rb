@@ -71,8 +71,8 @@ module Kauperts
     end
 
     # Immediately checks +object+ and returns the LinkChecker instance
-    def self.check!(object)
-      checker = new(object)
+    def self.check!(object, options = {})
+      checker = new(object, options)
       checker.check!
       checker
     end

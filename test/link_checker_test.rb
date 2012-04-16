@@ -34,6 +34,7 @@ class LinkCheckerTest < ActiveSupport::TestCase
   test "should have check! method" do
     obj = checker.new(url_object)
     assert_respond_to obj, :check!
+    assert_equal checker.method(:check!).arity, -2
   end
 
   test "should return status array with 200" do
