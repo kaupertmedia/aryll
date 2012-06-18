@@ -72,6 +72,20 @@ class LinkCheckerTest < ActiveSupport::TestCase
     assert_equal true, obj.ok?
   end
 
+  test "should ignore temporary redirects only if told so" do
+    url = url_object("http://www.example.com")
+    location = url.url + "/index.php"
+    stub_net_http_redirect!("302", location)
+
+    obj = checker.new(url)
+    obj.check!
+    assert_equal false, obj.ok?
+
+    obj = checker.new(url, :ignore_302_redirects => true)
+    obj.check!
+    assert_equal true, obj.ok?
+  end
+
   test "should return status array with 404" do
     stub_net_http!("404")
     url = url_object

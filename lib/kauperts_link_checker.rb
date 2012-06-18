@@ -72,6 +72,7 @@ module Kauperts
     # while +ignore_trailing_slash_redirects+ has been set to true
     def ok?
       return true if @status == '200'
+      return true if (@status == '302' and self.configuration.ignore_302_redirects)
       return true if (@redirect_with_trailing_slash_only == true and self.configuration.ignore_trailing_slash_redirects)
 
       false
