@@ -19,23 +19,23 @@ module Kauperts
 
     attr_reader :configuration, :object, :status
 
-		class Configuration < Struct.new(:ignore_trailing_slash_redirects)
-		end
+    class Configuration < Struct.new(:ignore_trailing_slash_redirects)
+    end
 
     # === Parameters
     # * +object+: an arbitrary object which responds to +url+.
-		# * +options+: optional configuration parameters, see below.
-		#
-		# === Available Options
-		# * +ignore_trailing_slash_redirects+: ignores redirects to the same URI but only with an added trailing slash (default: false)
+    # * +options+: optional configuration parameters, see below.
+    #
+    # === Available Options
+    # * +ignore_trailing_slash_redirects+: ignores redirects to the same URI but only with an added trailing slash (default: false)
     def initialize(object, options = {})
       object.respond_to?(:url) ? @object = object : raise(ArgumentError.new("object doesn't respond to url"))
 
-			# Assign config variables
-			@configuration = Configuration.new
-			options = { :ignore_trailing_slash_redirects => false }.merge(options).each do |key, val|
-				@configuration.send(:"#{key}=", val)
-			end
+      # Assign config variables
+      @configuration = Configuration.new
+      options = { :ignore_trailing_slash_redirects => false }.merge(options).each do |key, val|
+        @configuration.send(:"#{key}=", val)
+      end
 
     end
 
