@@ -2,7 +2,7 @@ $:.push File.expand_path("../lib/", __FILE__)
 
 Gem::Specification.new do |s|
   s.name          = "kauperts_link_checker"
-  s.version       = "0.4.1"
+  s.version       = "0.5.0"
   s.platform      = Gem::Platform::RUBY
   s.authors       = ["Wolfgang Vogl", "Carsten Zimmermann", "Matthias Viehweger"]
   s.email         = ["carp@hacksocke.de"]
