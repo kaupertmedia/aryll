@@ -31,6 +31,7 @@ class LinkCheckerTest < ActiveSupport::TestCase
 
     assert_respond_to obj.configuration, :ignore_302_redirects
     assert !obj.configuration.ignore_302_redirects
+    assert_equal false, obj.configuration.ignore_302_redirects
 
     obj = checker.new(url_object, :ignore_302_redirects => true)
 

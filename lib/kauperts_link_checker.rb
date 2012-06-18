@@ -35,7 +35,7 @@ module Kauperts
 
       # Assign config variables
       @configuration = Configuration.new
-      options = { :ignore_trailing_slash_redirects => false }.merge(options).each do |key, val|
+      options = { :ignore_trailing_slash_redirects => false, :ignore_302_redirects => false }.merge(options).each do |key, val|
         @configuration.send(:"#{key}=", val)
       end
 
