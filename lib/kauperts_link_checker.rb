@@ -19,8 +19,10 @@ module Kauperts
 
     attr_reader :configuration, :object, :status
 
-    class Configuration < Struct.new(:ignore_trailing_slash_redirects)
-    end
+    class Configuration < Struct.new(
+      :ignore_trailing_slash_redirects,
+      :ignore_302_redirects
+    ); end
 
     # === Parameters
     # * +object+: an arbitrary object which responds to +url+.

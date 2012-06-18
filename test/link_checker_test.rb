@@ -26,6 +26,18 @@ class LinkCheckerTest < ActiveSupport::TestCase
     assert_equal true, obj.configuration.ignore_trailing_slash_redirects
   end
 
+  test "should have an configuration option to ignore 302s" do
+    obj = checker.new(url_object)
+
+    assert_respond_to obj.configuration, :ignore_302_redirects
+    assert !obj.configuration.ignore_302_redirects
+
+    obj = checker.new(url_object, :ignore_302_redirects => true)
+
+    assert_respond_to obj.configuration, :ignore_302_redirects
+    assert_equal true, obj.configuration.ignore_302_redirects
+  end
+
   test "should expose object" do
     obj = checker.new(url_object)
     assert_respond_to obj, :object
