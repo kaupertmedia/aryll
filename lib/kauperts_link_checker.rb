@@ -1,5 +1,7 @@
 require "net/https"
 require "simpleidn"
+require "i18n"
+
 module Kauperts
 
   # Checks the status of an object which responds to +url+. The returned
