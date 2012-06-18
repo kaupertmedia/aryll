@@ -69,7 +69,10 @@ module Kauperts
     # or if a 301 permanent redirect only added a trailing slash
     # while +ignore_trailing_slash_redirects+ has been set to true
     def ok?
-      @status == '200' or (@redirect_with_trailing_slash_only == true and self.configuration.ignore_trailing_slash_redirects)
+      return true if @status == '200'
+      return true if (@redirect_with_trailing_slash_only == true and self.configuration.ignore_trailing_slash_redirects)
+
+      false
     end
 
     # Immediately checks +object+ and returns the LinkChecker instance
