@@ -11,20 +11,33 @@ class LinkCheckerTest < ActiveSupport::TestCase
     end
   end
 
-	test "should instantiate with optional configuration hash" do
-		assert defined?(Kauperts::LinkChecker::Configuration)
+  test "should instantiate with optional configuration hash" do
+    assert defined?(Kauperts::LinkChecker::Configuration)
 
-		obj = checker.new(url_object)
-		assert_respond_to obj, :configuration
+    obj = checker.new(url_object)
+    assert_respond_to obj, :configuration
 
-		assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
-		assert !obj.configuration.ignore_trailing_slash_redirects
+    assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
+    assert !obj.configuration.ignore_trailing_slash_redirects
 
-		obj = checker.new(url_object, :ignore_trailing_slash_redirects => true)
+    obj = checker.new(url_object, :ignore_trailing_slash_redirects => true)
 
-		assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
-		assert_equal true, obj.configuration.ignore_trailing_slash_redirects
-	end
+    assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
+    assert_equal true, obj.configuration.ignore_trailing_slash_redirects
+  end
+
+  test "should have an configuration option to ignore 302s" do
+    obj = checker.new(url_object)
+
+    assert_respond_to obj.configuration, :ignore_302_redirects
+    assert !obj.configuration.ignore_302_redirects
+    assert_equal false, obj.configuration.ignore_302_redirects
+
+    obj = checker.new(url_object, :ignore_302_redirects => true)
+
+    assert_respond_to obj.configuration, :ignore_302_redirects
+    assert_equal true, obj.configuration.ignore_302_redirects
+  end
 
   test "should expose object" do
     obj = checker.new(url_object)
@@ -45,19 +58,33 @@ class LinkCheckerTest < ActiveSupport::TestCase
     assert_equal "200", obj.check!
   end
 
-	test "should ignore permanent redirects with trailing slash only if told so" do
-		url = url_object("http://www.example.com/foo")
-		location = url.url + "/"
-		stub_net_http_redirect!("301", location)
+  test "should ignore permanent redirects with trailing slash only if told so" do
+    url = url_object("http://www.example.com/foo")
+    location = url.url + "/"
+    stub_net_http_redirect!("301", location)
 
-		obj = checker.new(url)
-		obj.check!
-		assert_equal false, obj.ok?
+    obj = checker.new(url)
+    obj.check!
+    assert_equal false, obj.ok?
 
-		obj = checker.new(url, :ignore_trailing_slash_redirects => true)
-		obj.check!
-		assert_equal true, obj.ok?
-	end
+    obj = checker.new(url, :ignore_trailing_slash_redirects => true)
+    obj.check!
+    assert_equal true, obj.ok?
+  end
+
+  test "should ignore temporary redirects only if told so" do
+    url = url_object("http://www.example.com")
+    location = url.url + "/index.php"
+    stub_net_http_redirect!("302", location)
+
+    obj = checker.new(url)
+    obj.check!
+    assert_equal false, obj.ok?
+
+    obj = checker.new(url, :ignore_302_redirects => true)
+    obj.check!
+    assert_equal true, obj.ok?
+  end
 
   test "should return status array with 404" do
     stub_net_http!("404")
@@ -177,12 +204,12 @@ class LinkCheckerTest < ActiveSupport::TestCase
     Net::HTTP.stubs(:get_response).returns(mock_response)
   end
 
-	def stub_net_https!(return_code = "200")
+  def stub_net_https!(return_code = "200")
     return_code = return_code.to_s
     mock_response = mock('sslresponse')
     mock_response.stubs(:code).returns(return_code)
     Net::HTTP.any_instance.stubs(:start).returns(mock_response)
-	end
+  end
 
   def stub_net_http_error!(exception, message)
     Net::HTTP.stubs(:get_response).raises(exception, message)
