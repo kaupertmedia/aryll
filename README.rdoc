@@ -5,13 +5,13 @@
 === Installation
 
 Add this line to your application's Gemfile:
- gem 'event_girl_client'
+ gem 'kauperts_link_checker'
 
 And then execute:
  $ bundle
 
 Or install it yourself as:
- $ gem install event_girl_client
+ $ gem install kauperts_link_checker
 
 === Usage
 It will check any object that responds to +url+:
