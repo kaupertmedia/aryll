@@ -1,17 +1,17 @@
-== Kauperts::LinkChecker
+== Kauperts::LinkChecker {<img src="https://travis-ci.org/kaupertmedia/kauperts_link_checker.png?branch=master" alt="Build Status" />}[https://travis-ci.org/kaupertmedia/kauperts_link_checker]
 
 <b>Kauperts::LinkChecker</b> is a simple library to check for the well-being of URLs. It supports HTTPS and IDN URIs. 
 
 === Installation
-The gem is not published yet and can be installed from github:
- git clone git://github.com/kaupertmedia/kauperts_link_checker.git
- cd kauperts_link_checker
- gem build kauperts_link_checker.gemspec
- gem install kauperts_link_checker-<gemversion>.gem
 
-Much easier using bundler:
- # Gemfile
- gem 'kauperts_link_checker', :git => "git://github.com/kaupermedia/kauperts_link_checker"
+Add this line to your application's Gemfile:
+ gem 'event_girl_client'
+
+And then execute:
+ $ bundle
+
+Or install it yourself as:
+ $ gem install event_girl_client
 
 === Usage
 It will check any object that responds to +url+:
