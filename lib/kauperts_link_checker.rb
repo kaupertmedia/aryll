@@ -17,8 +17,6 @@ module Kauperts
   # * <tt>kauperts.link_checker.status.redirect_permanently</tt>: translation for 301 permanent redirects
   class LinkChecker
 
-    VERSION = "0.5.1"
-
     attr_reader :configuration, :object, :status
 
     class Configuration < Struct.new(
