@@ -104,6 +104,22 @@ describe Kauperts::LinkChecker do
       end
     end
 
+    describe 'with IDN domains' do
+      let(:url_object) do
+        Class.new { def url; 'http://www.trotzköpfchen.de' end }.new
+      end
+
+      before do
+        SimpleIDN.expects(:to_ascii).returns('www.xn--trotzkpfchen-9ib.de').at_least(1)
+        stub_net_http!
+      end
+
+      it 'handles domain with umlauts' do
+        subject.check!.must_equal '200'
+        subject.ok?.must_equal true
+      end
+    end
+
   end
 
   def described_class
@@ -151,14 +167,6 @@ class LinkCheckerTest < ActiveSupport::TestCase
 
     assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
     assert_equal true, obj.configuration.ignore_trailing_slash_redirects
-  end
-
-  test "should handle domain with umlauts" do
-    SimpleIDN.expects(:to_ascii).returns('www.xn--trotzkpfchen-9ib.de').at_least(1)
-    stub_net_http!
-    url = url_object('http://www.trotzköpfchen.de')
-    obj = checker.new(url)
-    assert_equal "200", obj.check!
   end
 
   test "should handle ssl protocol" do
