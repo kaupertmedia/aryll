@@ -1,13 +1,9 @@
-# encoding: utf-8
 require 'test_helper'
 
 describe Kauperts::LinkChecker do
 
-  def url_object(url = nil, protocol = 'http')
-    obj = mock('url_object')
-    url ||= "#{protocol}://www.google.com"
-    obj.stubs(:url).returns(url)
-    obj
+  let(:url_object) do
+    Class.new { def url; 'http://www.example.com/foo' end }.new
   end
 
   subject { described_class.new url_object }
@@ -72,10 +68,6 @@ describe Kauperts::LinkChecker do
 
     describe 'with configuration options' do
       describe 'for trailing slashes' do
-        let(:url_object) do
-          Class.new { def url; 'http://www.example.com/foo' end }.new
-        end
-
         before { stub_net_http_redirect!("301", url_object.url + '/') }
 
         it 'considers trailing slashes for redirects not ok by default' do
