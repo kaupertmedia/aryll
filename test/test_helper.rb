@@ -2,7 +2,6 @@ require 'rubygems'
 require 'bundler/setup'
 
 
-require 'mocha'
 require 'minitest'
 require 'minitest/autorun'
 require 'active_support'
