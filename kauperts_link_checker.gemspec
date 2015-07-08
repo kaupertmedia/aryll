@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.version       = Kauperts::LinkChecker::VERSION
   s.platform      = Gem::Platform::RUBY
   s.authors       = ["Wolfgang Vogl", "Carsten Zimmermann", "Matthias Viehweger"]
-  s.email         = ["carp@hacksocke.de"]
+  s.email         = ["cz@aegisnet.de"]
   s.homepage      = ""
   s.summary       = "A simple library to check for the well-being of an URL"
   s.description   = "A simple library to check for the well-being of an URL"
