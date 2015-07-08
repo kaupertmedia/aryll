@@ -1,16 +1,90 @@
 # encoding: utf-8
 require 'test_helper'
 
-class LinkCheckerTest < ActiveSupport::TestCase
+describe Kauperts::LinkChecker do
 
-  test "should accept objects responding to url" do
-    assert_nothing_raised do
-      assert checker.new(url_object)
+  def url_object(url = nil, protocol = 'http')
+    obj = mock('url_object')
+    url ||= "#{protocol}://www.google.com"
+    obj.stubs(:url).returns(url)
+    obj
+  end
+
+  subject { described_class.new url_object }
+
+  describe 'its constructor' do
+    let(:url_object) { Class.new { attr_reader :url }.new }
+
+    it 'accepts objects responding to "url"' do
+      described_class.new(url_object).must_be_instance_of described_class
     end
-    assert_raises ArgumentError do
-      checker.new(Object.new)
+
+    it 'raises an ArgumentError if object does not respond to "url"' do
+      -> { described_class.new(Object.new) }.must_raise ArgumentError
+    end
+
+    it 'sets the url object' do
+      subject.object.must_equal url_object
     end
   end
+
+  describe '.check!' do
+    it { described_class.method(:check!).arity.must_equal(-2) }
+
+    it 'creates an instance and calls #check! on it' do
+      described_class.any_instance.expects(:check!)
+      described_class.check! url_object
+    end
+
+    it 'returns a link checker instance' do
+      described_class.check!(url_object).must_be_instance_of described_class
+    end
+  end
+
+  describe '#check!' do
+    it "returns a '200' status" do
+      stub_net_http!
+      subject.check!.must_equal '200'
+    end
+
+    it "returns a '404' status" do
+      stub_net_http!("404")
+      subject.check!.must_equal '404'
+    end
+
+  end
+
+  def described_class
+    Kauperts::LinkChecker
+  end
+
+  def stub_net_http!(return_code = "200")
+    return_code = return_code.to_s
+    mock_response = mock('response')
+    mock_response.stubs(:code).returns(return_code)
+    Net::HTTP.stubs(:get_response).returns(mock_response)
+  end
+
+  def stub_net_https!(return_code = "200")
+    return_code = return_code.to_s
+    mock_response = mock('sslresponse')
+    mock_response.stubs(:code).returns(return_code)
+    Net::HTTP.any_instance.stubs(:start).returns(mock_response)
+  end
+
+  def stub_net_http_error!(exception, message)
+    Net::HTTP.stubs(:get_response).raises(exception, message)
+  end
+
+  def stub_net_http_redirect!(return_code = '301', location ="http://auenland.de")
+    return_code = return_code.to_s
+    mock_response = {'location' => location}
+    mock_response.stubs(:code).returns(return_code)
+    Net::HTTP.stubs(:get_response).returns(mock_response)
+  end
+end
+
+class LinkCheckerTest < ActiveSupport::TestCase
 
   test "should instantiate with optional configuration hash" do
     assert defined?(Kauperts::LinkChecker::Configuration)
@@ -40,25 +114,6 @@ class LinkCheckerTest < ActiveSupport::TestCase
     assert_equal true, obj.configuration.ignore_302_redirects
   end
 
-  test "should expose object" do
-    obj = checker.new(url_object)
-    assert_respond_to obj, :object
-  end
-
-  test "should have check! method" do
-    obj = checker.new(url_object)
-    assert_respond_to obj, :check!
-    assert_equal checker.method(:check!).arity, -2
-  end
-
-  test "should return status array with 200" do
-    stub_net_http!
-    url = url_object
-    obj = checker.new(url)
-    a = obj.check!
-    assert_equal "200", obj.check!
-  end
-
   test "should ignore permanent redirects with trailing slash only if told so" do
     url = url_object("http://www.example.com/foo")
     location = url.url + "/"
@@ -85,13 +140,6 @@ class LinkCheckerTest < ActiveSupport::TestCase
     obj = checker.new(url, :ignore_302_redirects => true)
     obj.check!
     assert_equal true, obj.ok?
-  end
-
-  test "should return status array with 404" do
-    stub_net_http!("404")
-    url = url_object
-    obj = checker.new(url)
-    assert_equal "404", obj.check!
   end
 
   test "should handle time out exceptions" do
@@ -150,16 +198,6 @@ class LinkCheckerTest < ActiveSupport::TestCase
     assert !obj.ok?
     obj.check!
     assert obj.ok?
-  end
-
-  test "should check directly when called from class" do
-    stub_net_http!
-    url = url_object
-    assert_respond_to checker, :check!
-    assert_raises ArgumentError do
-      checker.check!
-    end
-    assert_kind_of checker, checker.check!(url)
   end
 
   test "should support I18n message for timeout error" do
