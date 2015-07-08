@@ -69,7 +69,7 @@ describe Kauperts::LinkChecker do
 
     describe 'with configuration options' do
       describe 'for trailing slashes' do
-        before { stub_net_http_redirect!("301", url_object.url + '/') }
+        before { stub_net_http_redirect!("301", location: url_object.url + '/') }
 
         it 'considers trailing slashes for redirects not ok by default' do
           subject.check!
@@ -196,10 +196,10 @@ describe Kauperts::LinkChecker do
     Net::HTTP.stubs(:get_response).raises(exception, message)
   end
 
-  def stub_net_http_redirect!(return_code = '301', location ="http://auenland.de")
-    return_code = return_code.to_s
-    mock_response = {'location' => location}
-    mock_response.stubs(:code).returns(return_code)
-    Net::HTTP.stubs(:get_response).returns(mock_response)
+  def stub_net_http_redirect!(return_code = '301', location: "http://auenland.de")
+    stub_request(:get, "http://www.example.com").to_return(
+      status: return_code.to_i,
+      headers: { 'Location' => location }
+    )
   end
 end
