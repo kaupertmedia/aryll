@@ -3,7 +3,7 @@ require 'test_helper'
 describe Kauperts::LinkChecker do
 
   let(:url_object) do
-    Class.new { def url; 'http://www.example.com/foo' end }.new
+    Class.new { def url; 'http://www.example.com' end }.new
   end
 
   subject { described_class.new url_object }
@@ -62,6 +62,7 @@ describe Kauperts::LinkChecker do
       end
 
       it "returns a '200' status" do
+        stub_net_http! protocol: 'https'
         subject.check!.must_equal '200'
       end
     end
@@ -148,8 +149,7 @@ describe Kauperts::LinkChecker do
       end
 
       before do
-        SimpleIDN.expects(:to_ascii).returns('www.xn--trotzkpfchen-9ib.de').at_least(1)
-        stub_net_http!
+        stub_net_http!(host: 'www.xn--trotzkpfchen-9ib.de')
       end
 
       it 'handles domain with umlauts' do
@@ -188,18 +188,8 @@ describe Kauperts::LinkChecker do
     Kauperts::LinkChecker
   end
 
-  def stub_net_http!(return_code = "200")
-    return_code = return_code.to_s
-    mock_response = mock('response')
-    mock_response.stubs(:code).returns(return_code)
-    Net::HTTP.stubs(:get_response).returns(mock_response)
-  end
-
-  def stub_net_https!(return_code = "200")
-    return_code = return_code.to_s
-    mock_response = mock('sslresponse')
-    mock_response.stubs(:code).returns(return_code)
-    Net::HTTP.any_instance.stubs(:start).returns(mock_response)
+  def stub_net_http!(return_code = "200", host: 'www.example.com', path: '/', protocol: 'http')
+    stub_request(:get, "#{protocol}://#{host}#{path}").to_return(status: return_code.to_i)
   end
 
   def stub_net_http_error!(exception, message)
