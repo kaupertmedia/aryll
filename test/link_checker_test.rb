@@ -102,7 +102,9 @@ describe Kauperts::LinkChecker do
     end
 
     describe 'with timeout errors' do
-      before { stub_net_http_error!(Timeout::Error, 'Takes way too long') }
+      before do
+        stub_request(:any, 'www.example.com').to_timeout
+      end
 
       it 'handles timeouts' do
         subject.check!
@@ -124,7 +126,9 @@ describe Kauperts::LinkChecker do
     describe 'with a unrecognized network error' do
       let(:generic_error) { Class.new(StandardError) }
 
-      before { stub_net_http_error!(generic_error, 'Somehow broken') }
+      before do
+        stub_request(:any, 'www.example.com').to_raise generic_error
+      end
 
       it 'handles generic network problem' do
         subject.check!
@@ -190,10 +194,6 @@ describe Kauperts::LinkChecker do
 
   def stub_net_http!(return_code = "200", host: 'www.example.com', path: '/', protocol: 'http')
     stub_request(:get, "#{protocol}://#{host}#{path}").to_return(status: return_code.to_i)
-  end
-
-  def stub_net_http_error!(exception, message)
-    Net::HTTP.stubs(:get_response).raises(exception, message)
   end
 
   def stub_net_http_redirect!(return_code = '301', location: "http://auenland.de")
