@@ -52,6 +52,46 @@ describe Kauperts::LinkChecker do
       subject.check!.must_equal '404'
     end
 
+    describe 'with configuration options' do
+
+      describe 'for trailing slashes' do
+        let(:url_object) do
+          Class.new { def url; 'http://www.example.com/foo' end }.new
+        end
+
+        before { stub_net_http_redirect!("301", url_object.url + '/') }
+
+        it 'considers trailing slashes for redirects not ok by default' do
+          subject.check!
+          subject.ok?.must_equal false
+        end
+
+        it 'ignores permanent redirects with trailing slash' do
+          subject = described_class.new(url_object, ignore_trailing_slash_redirects: true )
+          subject.check!
+          subject.ok?.must_equal true
+        end
+      end
+
+      describe 'for temporary redirects (302)' do
+        before do
+          stub_net_http_redirect!("302")
+        end
+
+        it 'considers temporary redirects not ok by default' do
+          subject.check!
+          subject.ok?.must_equal false
+        end
+
+        it 'ignores temporary redirects' do
+          subject = described_class.new(url_object, ignore_302_redirects: true)
+          subject.check!
+          subject.ok?.must_equal true
+        end
+      end
+
+    end
+
   end
 
   def described_class
@@ -99,47 +139,6 @@ class LinkCheckerTest < ActiveSupport::TestCase
 
     assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
     assert_equal true, obj.configuration.ignore_trailing_slash_redirects
-  end
-
-  test "should have an configuration option to ignore 302s" do
-    obj = checker.new(url_object)
-
-    assert_respond_to obj.configuration, :ignore_302_redirects
-    assert !obj.configuration.ignore_302_redirects
-    assert_equal false, obj.configuration.ignore_302_redirects
-
-    obj = checker.new(url_object, :ignore_302_redirects => true)
-
-    assert_respond_to obj.configuration, :ignore_302_redirects
-    assert_equal true, obj.configuration.ignore_302_redirects
-  end
-
-  test "should ignore permanent redirects with trailing slash only if told so" do
-    url = url_object("http://www.example.com/foo")
-    location = url.url + "/"
-    stub_net_http_redirect!("301", location)
-
-    obj = checker.new(url)
-    obj.check!
-    assert_equal false, obj.ok?
-
-    obj = checker.new(url, :ignore_trailing_slash_redirects => true)
-    obj.check!
-    assert_equal true, obj.ok?
-  end
-
-  test "should ignore temporary redirects only if told so" do
-    url = url_object("http://www.example.com")
-    location = url.url + "/index.php"
-    stub_net_http_redirect!("302", location)
-
-    obj = checker.new(url)
-    obj.check!
-    assert_equal false, obj.ok?
-
-    obj = checker.new(url, :ignore_302_redirects => true)
-    obj.check!
-    assert_equal true, obj.ok?
   end
 
   test "should handle time out exceptions" do
