@@ -60,6 +60,16 @@ describe Kauperts::LinkChecker do
       subject.check!.must_equal '404'
     end
 
+    describe 'with SSL' do
+      let(:url_object) do
+        Class.new { def url; 'https://www.example.com/' end }.new
+      end
+
+      it "returns a '200' status" do
+        subject.check!.must_equal '200'
+      end
+    end
+
     describe 'with configuration options' do
       describe 'for trailing slashes' do
         let(:url_object) do
@@ -227,33 +237,6 @@ class LinkCheckerTest < ActiveSupport::TestCase
 
     assert_respond_to obj.configuration, :ignore_trailing_slash_redirects
     assert_equal true, obj.configuration.ignore_trailing_slash_redirects
-  end
-
-  test "should handle ssl protocol" do
-    stub_net_https!
-    url = url_object(nil, "https")
-    obj = checker.new(url)
-    assert_equal "200", obj.check!
-  end
-
-  test "should have status" do
-    stub_net_http!
-    url = url_object
-    obj = checker.new(url)
-    assert_respond_to obj, :status
-    assert_nil obj.status
-    obj.check!
-    assert_not_nil obj.status
-  end
-
-  test "should have ok? method" do
-    stub_net_http!
-    url = url_object
-    obj = checker.new(url)
-    assert_respond_to obj, :ok?
-    assert !obj.ok?
-    obj.check!
-    assert obj.ok?
   end
 
   protected
