@@ -12,6 +12,14 @@ describe Kauperts::LinkChecker do
 
   subject { described_class.new url_object }
 
+  let(:translation) { {} }
+
+  before do
+    I18n.backend.store_translations I18n.locale, translation
+  end
+
+  after { I18n.backend.reload! }
+
   describe 'its constructor' do
     let(:url_object) { Class.new { attr_reader :url }.new }
 
@@ -90,17 +98,45 @@ describe Kauperts::LinkChecker do
       end
     end
 
-    describe 'with network errors' do
+    describe 'with timeout errors' do
+      before { stub_net_http_error!(Timeout::Error, 'Takes way too long') }
+
       it 'handles timeouts' do
-        stub_net_http_error!(Timeout::Error, 'Takes way too long')
         subject.check!
         subject.status.must_match(/Timeout .+/)
       end
 
+      describe 'with I18n' do
+        let(:translation) do
+          { kauperts: { link_checker: { errors: { timeout: "Zeitüberschreitung" } } } }
+        end
+
+        it 'translates the error message' do
+          subject.check!
+          subject.status.must_match(/Zeitüberschreitung .+/)
+        end
+      end
+    end
+
+    describe 'with a unrecognized network error' do
+      let(:generic_error) { Class.new(StandardError) }
+
+      before { stub_net_http_error!(generic_error, 'Somehow broken') }
+
       it 'handles generic network problem' do
-        stub_net_http_error!(Class.new(StandardError), 'Somehow broken')
         subject.check!
         subject.status.must_match(/Generic network error .+/)
+      end
+
+      describe 'with I18n' do
+        let(:translation) do
+          { kauperts: { link_checker: { errors: { generic_network: "Netzwerkfehler" } } } }
+        end
+
+        it 'translates the error message' do
+          subject.check!
+          subject.status.must_match(/Netzwerkfehler .+/)
+        end
       end
     end
 
@@ -117,6 +153,30 @@ describe Kauperts::LinkChecker do
       it 'handles domain with umlauts' do
         subject.check!.must_equal '200'
         subject.ok?.must_equal true
+      end
+    end
+
+  end
+
+  describe '#status' do
+    describe 'with a permanent redirect' do
+      before do
+        stub_net_http_redirect!("301")
+        subject.check!
+      end
+
+      it 'returns the redirection url' do
+        subject.status.must_equal 'Moved permanently (http://auenland.de)'
+      end
+
+      describe 'with I18n' do
+        let(:translation) do
+          { kauperts: { link_checker: { status: { redirect_permanently: "Umgezogen" } } } }
+        end
+
+        it 'translates the status' do
+          subject.status.must_match(/Umgezogen \(http:.+/)
+        end
       end
     end
 
@@ -195,36 +255,6 @@ class LinkCheckerTest < ActiveSupport::TestCase
     obj.check!
     assert obj.ok?
   end
-
-  test "should support I18n message for timeout error" do
-    I18n.expects(:t).with(:"kauperts.link_checker.errors.timeout", :default => "Timeout").returns('Zeitüberschreitung')
-    stub_net_http_error!(Timeout::Error, "Dauert zu lange")
-    url = url_object
-    assert_match /Zeitüberschreitung (.+)/, checker.check!(url).status
-  end
-
-  test "should support I18n message for generic network error" do
-    I18n.expects(:t).with(:"kauperts.link_checker.errors.generic_network", :default => "Generic network error").returns('Netzwerkfehler')
-    class GenericNetworkException < Exception; end
-    stub_net_http_error!(GenericNetworkException, "Irgendwie kaputt")
-    url = url_object
-    assert_match /Netzwerkfehler (.+)/, checker.check!(url).status
-  end
-
-  test "should return redirection url" do
-    stub_net_http_redirect!
-    url = url_object
-    assert_match /auenland.de/, checker.check!(url).status
-  end
-
-  test "should support I18n message for 301 permanent redirects" do
-    I18n.expects(:t).with(:"kauperts.link_checker.status.redirect_permanently", :default => "Moved permanently").returns('Umgezogen')
-    location = "http://auenland.de"
-    stub_net_http_redirect!(301, location)
-    url = url_object
-    assert_match /Umgezogen \(#{location}\)/, checker.check!(url).status
-  end
-
 
   protected
 
