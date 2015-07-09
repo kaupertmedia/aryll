@@ -3,7 +3,7 @@ require 'test_helper'
 describe Kauperts::LinkChecker do
 
   let(:url_object) do
-    Class.new { def url; 'http://www.example.com/foo' end }.new
+    Class.new { def url; 'http://www.example.com' end }.new
   end
 
   subject { described_class.new url_object }
@@ -35,13 +35,14 @@ describe Kauperts::LinkChecker do
   describe '.check!' do
     it { described_class.method(:check!).arity.must_equal(-2) }
 
-    it 'creates an instance and calls #check! on it' do
-      described_class.any_instance.expects(:check!)
-      described_class.check! url_object
-    end
+    let(:request_stub) { stub_net_http! }
+
+    before { request_stub }
 
     it 'returns a link checker instance' do
-      described_class.check!(url_object).must_be_instance_of described_class
+      subject = described_class.check!(url_object)
+      subject.must_be_instance_of described_class
+      assert_requested request_stub
     end
   end
 
@@ -62,13 +63,14 @@ describe Kauperts::LinkChecker do
       end
 
       it "returns a '200' status" do
+        stub_net_http! protocol: 'https'
         subject.check!.must_equal '200'
       end
     end
 
     describe 'with configuration options' do
       describe 'for trailing slashes' do
-        before { stub_net_http_redirect!("301", url_object.url + '/') }
+        before { stub_net_http_redirect!("301", location: url_object.url + '/') }
 
         it 'considers trailing slashes for redirects not ok by default' do
           subject.check!
@@ -101,7 +103,9 @@ describe Kauperts::LinkChecker do
     end
 
     describe 'with timeout errors' do
-      before { stub_net_http_error!(Timeout::Error, 'Takes way too long') }
+      before do
+        stub_request(:any, 'www.example.com').to_timeout
+      end
 
       it 'handles timeouts' do
         subject.check!
@@ -123,7 +127,9 @@ describe Kauperts::LinkChecker do
     describe 'with a unrecognized network error' do
       let(:generic_error) { Class.new(StandardError) }
 
-      before { stub_net_http_error!(generic_error, 'Somehow broken') }
+      before do
+        stub_request(:any, 'www.example.com').to_raise generic_error
+      end
 
       it 'handles generic network problem' do
         subject.check!
@@ -148,8 +154,7 @@ describe Kauperts::LinkChecker do
       end
 
       before do
-        SimpleIDN.expects(:to_ascii).returns('www.xn--trotzkpfchen-9ib.de').at_least(1)
-        stub_net_http!
+        stub_net_http!(host: 'www.xn--trotzkpfchen-9ib.de')
       end
 
       it 'handles domain with umlauts' do
@@ -188,28 +193,14 @@ describe Kauperts::LinkChecker do
     Kauperts::LinkChecker
   end
 
-  def stub_net_http!(return_code = "200")
-    return_code = return_code.to_s
-    mock_response = mock('response')
-    mock_response.stubs(:code).returns(return_code)
-    Net::HTTP.stubs(:get_response).returns(mock_response)
+  def stub_net_http!(return_code = "200", host: 'www.example.com', path: '/', protocol: 'http')
+    stub_request(:get, "#{protocol}://#{host}#{path}").to_return(status: return_code.to_i)
   end
 
-  def stub_net_https!(return_code = "200")
-    return_code = return_code.to_s
-    mock_response = mock('sslresponse')
-    mock_response.stubs(:code).returns(return_code)
-    Net::HTTP.any_instance.stubs(:start).returns(mock_response)
-  end
-
-  def stub_net_http_error!(exception, message)
-    Net::HTTP.stubs(:get_response).raises(exception, message)
-  end
-
-  def stub_net_http_redirect!(return_code = '301', location ="http://auenland.de")
-    return_code = return_code.to_s
-    mock_response = {'location' => location}
-    mock_response.stubs(:code).returns(return_code)
-    Net::HTTP.stubs(:get_response).returns(mock_response)
+  def stub_net_http_redirect!(return_code = '301', location: "http://auenland.de")
+    stub_request(:get, "http://www.example.com").to_return(
+      status: return_code.to_i,
+      headers: { 'Location' => location }
+    )
   end
 end
