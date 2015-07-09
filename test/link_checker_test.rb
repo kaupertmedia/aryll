@@ -35,13 +35,14 @@ describe Kauperts::LinkChecker do
   describe '.check!' do
     it { described_class.method(:check!).arity.must_equal(-2) }
 
-    it 'creates an instance and calls #check! on it' do
-      described_class.any_instance.expects(:check!)
-      described_class.check! url_object
-    end
+    let(:request_stub) { stub_net_http! }
+
+    before { request_stub }
 
     it 'returns a link checker instance' do
-      described_class.check!(url_object).must_be_instance_of described_class
+      subject = described_class.check!(url_object)
+      subject.must_be_instance_of described_class
+      assert_requested request_stub
     end
   end
 
