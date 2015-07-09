@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rdoc'
   s.add_development_dependency 'bundler'
-  s.add_development_dependency 'activesupport', '>= 4.0'
+  s.add_development_dependency 'minitest', '>= 5.0'
   s.add_development_dependency 'webmock'
 end
 
