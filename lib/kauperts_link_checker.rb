@@ -5,9 +5,9 @@ require 'kauperts_link_checker/status_message'
 
 module Kauperts
 
-  # Checks the status of an object which responds to +url+. The returned
-  # status can be accessed via +status+. It contains either a string
-  # representation of a numeric http status code or an error message.
+  # Checks the status of a web address. The returned status can be accessed via
+  # +status+. It contains either a string representation of a numeric http
+  # status code or an error message.
   #
   # Supports HTTPS and IDN-domains.
   #
@@ -36,11 +36,12 @@ module Kauperts
     attr_reader :url, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects
 
     # === Parameters
-    # * +url+: an arbitrary url which responds to +url+.
+    # * +url+: URL, complete with protocol scheme
     # * +options+: optional configuration parameters, see below.
     #
     # === Available Options
     # * +ignore_trailing_slash_redirects+: ignores redirects to the same URI but only with an added trailing slash (default: false)
+    # * +ignore_302_redirects+: ignores temporary redirects (default: false)
     def initialize(url, ignore_trailing_slash_redirects: false, ignore_302_redirects: false)
       @url = url
 
@@ -49,7 +50,7 @@ module Kauperts
 
     end
 
-    # Checks the associated url url. Sets and returns +status+
+    # Checks the associated url. Sets and returns +status+
     def check!
       @status = begin
                   if response.code == '301'
