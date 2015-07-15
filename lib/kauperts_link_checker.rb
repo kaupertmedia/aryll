@@ -36,8 +36,8 @@ module Kauperts
     def initialize(object, ignore_trailing_slash_redirects: false, ignore_302_redirects: false)
       object.respond_to?(:url) ? @object = object : raise(ArgumentError.new("object doesn't respond to url"))
 
-      @ignore_trailing_slash_redirects = ignore_trailing_slash_redirects
-      @ignore_302_redirects = ignore_302_redirects
+      @ignore_trailing_slash_redirects = ignore_trailing_slash_redirects || self.class.ignore_trailing_slash_redirects
+      @ignore_302_redirects = ignore_302_redirects || self.class.ignore_302_redirects
 
     end
 
