@@ -2,11 +2,11 @@ require 'test_helper'
 
 describe Kauperts::LinkChecker do
 
-  let(:url_object) do
-    Class.new { def url; 'http://www.example.com' end }.new
+  let(:url) do
+    'http://www.example.com'
   end
 
-  subject { described_class.new url_object }
+  subject { described_class.new url }
 
   let(:translation) { {} }
 
@@ -16,19 +16,36 @@ describe Kauperts::LinkChecker do
 
   after { I18n.backend.reload! }
 
+  describe 'the class-level configuration defaults' do
+
+    [:ignore_trailing_slash_redirects, :ignore_302_redirects].each do |configuration|
+      describe ".#{configuration}" do
+        it "has a getter and setter" do
+          described_class.must_respond_to configuration
+          described_class.must_respond_to "#{configuration}="
+        end
+      end
+    end
+
+    describe '.configure' do
+      [:ignore_trailing_slash_redirects, :ignore_302_redirects].each do |configuration|
+        it "changes the value for #{configuration}" do
+          config_val = described_class.send configuration
+          proc {
+            described_class.configure do |config|
+              config.send "#{configuration}=", 'foo'
+            end
+          }.must_change -> { described_class.send(configuration) }
+          described_class.send "#{configuration}=", config_val
+        end
+      end
+    end
+
+  end
+
   describe 'its constructor' do
-    let(:url_object) { Class.new { attr_reader :url }.new }
-
-    it 'accepts objects responding to "url"' do
-      described_class.new(url_object).must_be_instance_of described_class
-    end
-
-    it 'raises an ArgumentError if object does not respond to "url"' do
-      -> { described_class.new(Object.new) }.must_raise ArgumentError
-    end
-
     it 'sets the url object' do
-      subject.object.must_equal url_object
+      subject.url.must_equal url
     end
   end
 
@@ -40,7 +57,7 @@ describe Kauperts::LinkChecker do
     before { request_stub }
 
     it 'returns a link checker instance' do
-      subject = described_class.check!(url_object)
+      subject = described_class.check!(url)
       subject.must_be_instance_of described_class
       assert_requested request_stub
     end
@@ -58,8 +75,8 @@ describe Kauperts::LinkChecker do
     end
 
     describe 'with SSL' do
-      let(:url_object) do
-        Class.new { def url; 'https://www.example.com/' end }.new
+      let(:url) do
+        'https://www.example.com/'
       end
 
       it "returns a '200' status" do
@@ -70,7 +87,7 @@ describe Kauperts::LinkChecker do
 
     describe 'with configuration options' do
       describe 'for trailing slashes' do
-        before { stub_net_http_redirect!("301", location: url_object.url + '/') }
+        before { stub_net_http_redirect!("301", location: url + '/') }
 
         it 'considers trailing slashes for redirects not ok by default' do
           subject.check!
@@ -78,7 +95,7 @@ describe Kauperts::LinkChecker do
         end
 
         it 'ignores permanent redirects with trailing slash' do
-          subject = described_class.new(url_object, ignore_trailing_slash_redirects: true )
+          subject = described_class.new(url, ignore_trailing_slash_redirects: true )
           subject.check!
           subject.ok?.must_equal true
         end
@@ -95,7 +112,7 @@ describe Kauperts::LinkChecker do
         end
 
         it 'ignores temporary redirects' do
-          subject = described_class.new(url_object, ignore_302_redirects: true)
+          subject = described_class.new(url, ignore_302_redirects: true)
           subject.check!
           subject.ok?.must_equal true
         end
@@ -149,8 +166,8 @@ describe Kauperts::LinkChecker do
     end
 
     describe 'with IDN domains' do
-      let(:url_object) do
-        Class.new { def url; 'http://www.trotzköpfchen.de' end }.new
+      let(:url) do
+        'http://www.trotzköpfchen.de'
       end
 
       before do

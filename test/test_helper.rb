@@ -12,3 +12,20 @@ require 'webmock/minitest'
 require 'kauperts_link_checker'
 
 I18n.available_locales = :en
+
+module MiniTest
+  module Assertions
+
+    def assert_change(change_proc)
+      before = change_proc.call
+      yield
+      after  = change_proc.call
+      refute_equal before, after
+    end
+
+  end
+
+  module Expectations
+    infect_an_assertion :assert_change, :must_change, :block
+  end
+end
