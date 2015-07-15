@@ -1,7 +1,7 @@
 require "net/https"
 require "simpleidn"
-require "i18n"
 require 'kauperts_link_checker/international_uri'
+require 'kauperts_link_checker/status_message'
 
 module Kauperts
 
@@ -44,19 +44,18 @@ module Kauperts
 
     # Checks the associated url url. Sets and returns +status+
     def check!
-      begin
-        status = if response.code == '301'
-                   @redirect_with_trailing_slash_only = "#{uri}/" == response['location']
-                   "#{I18n.t :"kauperts.link_checker.status.redirect_permanently", :default => "Moved permanently"} (#{response['location']})"
-                 else
-                   response.code
-                 end
-      rescue Timeout::Error => e
-        status = "#{I18n.t :"kauperts.link_checker.errors.timeout", :default => "Timeout"} (#{e.message})"
-      rescue Exception => e
-        status = "#{I18n.t :"kauperts.link_checker.errors.generic_network", :default => "Generic network error"} (#{e.message})"
-      end
-      @status = status
+      @status = begin
+                  if response.code == '301'
+                    @redirect_with_trailing_slash_only = "#{uri}/" == response['location']
+                    StatusMessage.moved_permanently response['location']
+                  else
+                    response.code
+                  end
+                rescue Timeout::Error => e
+                  StatusMessage.timeout e.message
+                rescue Exception => e
+                  StatusMessage.generic e.message
+                end
     end
 
     # Returns if a check has been run and the return code was '200 OK'
