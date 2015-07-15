@@ -25,26 +25,26 @@ module Kauperts
       end
     end
 
-    attr_reader :object, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects
+    attr_reader :url, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects
 
     # === Parameters
-    # * +object+: an arbitrary object which responds to +url+.
+    # * +url+: an arbitrary url which responds to +url+.
     # * +options+: optional configuration parameters, see below.
     #
     # === Available Options
     # * +ignore_trailing_slash_redirects+: ignores redirects to the same URI but only with an added trailing slash (default: false)
-    def initialize(object, ignore_trailing_slash_redirects: false, ignore_302_redirects: false)
-      @object = object
+    def initialize(url, ignore_trailing_slash_redirects: false, ignore_302_redirects: false)
+      @url = url
 
       @ignore_trailing_slash_redirects = ignore_trailing_slash_redirects || self.class.ignore_trailing_slash_redirects
       @ignore_302_redirects = ignore_302_redirects || self.class.ignore_302_redirects
 
     end
 
-    # Checks the associated url object. Sets and returns +status+
+    # Checks the associated url url. Sets and returns +status+
     def check!
       begin
-        uri = parsed_uri(@object)
+        uri = parsed_uri(@url)
         if uri.scheme == 'https'
           http = Net::HTTP.new(uri.host , 443)
           http.use_ssl = true
@@ -78,9 +78,9 @@ module Kauperts
       false
     end
 
-    # Immediately checks +object+ and returns the LinkChecker instance
-    def self.check!(object, options = {})
-      checker = new(object, options)
+    # Immediately checks +url+ and returns the LinkChecker instance
+    def self.check!(url, options = {})
+      checker = new(url, options)
       checker.check!
       checker
     end

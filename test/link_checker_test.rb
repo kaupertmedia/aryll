@@ -45,7 +45,7 @@ describe Kauperts::LinkChecker do
 
   describe 'its constructor' do
     it 'sets the url object' do
-      subject.object.must_equal url
+      subject.url.must_equal url
     end
   end
 
