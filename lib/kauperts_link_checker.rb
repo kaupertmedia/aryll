@@ -45,7 +45,7 @@ module Kauperts
     # Checks the associated url url. Sets and returns +status+
     def check!
       begin
-        uri = parsed_uri(@url)
+        uri = InternationalURI(url)
         if uri.scheme == 'https'
           http = Net::HTTP.new(uri.host , 443)
           http.use_ssl = true
@@ -84,14 +84,6 @@ module Kauperts
       checker = new(url, options)
       checker.check!
       checker
-    end
-
-    protected
-
-    # Transforms a possible IDN within +url+ into ASCII and returns
-    # a parsed URI instance.
-    def parsed_uri(url)
-      InternationalURI(url)
     end
 
   end
