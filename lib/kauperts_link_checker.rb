@@ -17,6 +17,14 @@ module Kauperts
   # * <tt>kauperts.link_checker.status.redirect_permanently</tt>: translation for 301 permanent redirects
   class LinkChecker
 
+    class << self
+      attr_accessor :ignore_trailing_slash_redirects, :ignore_302_redirects
+
+      def configure
+        yield self
+      end
+    end
+
     attr_reader :configuration, :object, :status
 
     class Configuration < Struct.new(

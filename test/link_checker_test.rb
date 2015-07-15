@@ -16,6 +16,33 @@ describe Kauperts::LinkChecker do
 
   after { I18n.backend.reload! }
 
+  describe 'the class-level configuration defaults' do
+
+    [:ignore_trailing_slash_redirects, :ignore_302_redirects].each do |configuration|
+      describe ".#{configuration}" do
+        it "has a getter and setter" do
+          described_class.must_respond_to configuration
+          described_class.must_respond_to "#{configuration}="
+        end
+      end
+    end
+
+    describe '.configure' do
+      [:ignore_trailing_slash_redirects, :ignore_302_redirects].each do |configuration|
+        it "changes the value for #{configuration}" do
+          config_val = described_class.send configuration
+          proc {
+            described_class.configure do |config|
+              config.send "#{configuration}=", 'foo'
+            end
+          }.must_change -> { described_class.send(configuration) }
+          described_class.send "#{configuration}=", config_val
+        end
+      end
+    end
+
+  end
+
   describe 'its constructor' do
     let(:url_object) { Class.new { attr_reader :url }.new }
 
