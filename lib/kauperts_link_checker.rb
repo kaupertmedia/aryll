@@ -69,11 +69,9 @@ module Kauperts
     # or if a 301 permanent redirect only added a trailing slash
     # while +ignore_trailing_slash_redirects+ has been set to true
     def ok?
-      return true if @status == '200'
-      return true if (@status == '302' and ignore_302_redirects)
-      return true if (@redirect_with_trailing_slash_only == true and ignore_trailing_slash_redirects)
-
-      false
+      (status == '200') ||
+        (status == '302' && ignore_302_redirects) ||
+        [@redirect_with_trailing_slash_only, ignore_trailing_slash_redirects].all?
     end
 
     def uri
