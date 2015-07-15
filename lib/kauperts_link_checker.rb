@@ -1,6 +1,7 @@
 require "net/https"
 require "simpleidn"
 require "i18n"
+require 'kauperts_link_checker/international_uri'
 
 module Kauperts
 
@@ -16,30 +17,6 @@ module Kauperts
   # * <tt>kauperts.link_checker.errors.generic_network</tt>: (currently) rescues from all other exceptions
   # * <tt>kauperts.link_checker.status.redirect_permanently</tt>: translation for 301 permanent redirects
   class LinkChecker
-
-    class InternationalURI < Struct.new(:url)
-      def domain
-        @domain ||= url_without_protocol.split('/', 2)[0]
-      end
-
-      def idn_domain
-        @idn_domain ||= SimpleIDN.to_ascii domain
-      end
-
-      def to_uri
-        URI.parse(url.gsub(domain, idn_domain))
-      end
-
-      private
-
-      def url_without_protocol
-        @url_without_protocol ||= /^http[s]?:\/\/(.+)/.match(url)[1]
-      end
-    end
-
-    def InternationalURI(url)
-      InternationalURI.new(url).to_uri
-    end
 
     class << self
       attr_accessor :ignore_trailing_slash_redirects, :ignore_302_redirects
@@ -119,3 +96,4 @@ module Kauperts
 
   end
 end
+
