@@ -45,15 +45,6 @@ module Kauperts
     # Checks the associated url url. Sets and returns +status+
     def check!
       begin
-        uri = InternationalURI(url)
-        if uri.scheme == 'https'
-          http = Net::HTTP.new(uri.host , 443)
-          http.use_ssl = true
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-          response = http.start{ http.get2(uri.to_s) }
-        else
-          response = Net::HTTP.get_response(uri)
-        end
         status = if response.code == '301'
                    @redirect_with_trailing_slash_only = "#{uri}/" == response['location']
                    "#{I18n.t :"kauperts.link_checker.status.redirect_permanently", :default => "Moved permanently"} (#{response['location']})"
@@ -79,11 +70,28 @@ module Kauperts
       false
     end
 
+    def uri
+      @uri ||= InternationalURI(url)
+    end
+
     # Immediately checks +url+ and returns the LinkChecker instance
     def self.check!(url, options = {})
       checker = new(url, options)
       checker.check!
       checker
+    end
+
+    private
+
+    def response
+      @response ||= if uri.scheme == 'https'
+                      http = Net::HTTP.new(uri.host , 443)
+                      http.use_ssl = true
+                      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+                      http.start{ http.get2(uri.to_s) }
+                    else
+                      Net::HTTP.get_response(uri)
+                    end
     end
 
   end
