@@ -17,6 +17,26 @@ module Kauperts
   # * <tt>kauperts.link_checker.status.redirect_permanently</tt>: translation for 301 permanent redirects
   class LinkChecker
 
+    class ParsedURI < Struct.new(:url)
+      def domain
+        @domain ||= url_without_protocol.split('/', 2)[0]
+      end
+
+      def idn_domain
+        @idn_domain ||= SimpleIDN.to_ascii domain
+      end
+
+      def to_uri
+        URI.parse(url.gsub(domain, idn_domain))
+      end
+
+      private
+
+      def url_without_protocol
+        @url_without_protocol ||= /^http[s]?:\/\/(.+)/.match(url)[1]
+      end
+    end
+
     class << self
       attr_accessor :ignore_trailing_slash_redirects, :ignore_302_redirects
 
@@ -90,10 +110,7 @@ module Kauperts
     # Transforms a possible IDN within +url+ into ASCII and returns
     # a parsed URI instance.
     def parsed_uri(url)
-      url_without_protocol = /^http[s]?:\/\/(.+)/.match(url)[1]
-      domain = url_without_protocol.split('/', 2)[0]
-      idn_domain = SimpleIDN.to_ascii(domain)
-      URI.parse(url.gsub(domain, idn_domain))
+      ParsedURI.new(url).to_uri
     end
 
   end
