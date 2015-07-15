@@ -34,7 +34,7 @@ module Kauperts
     # === Available Options
     # * +ignore_trailing_slash_redirects+: ignores redirects to the same URI but only with an added trailing slash (default: false)
     def initialize(object, ignore_trailing_slash_redirects: false, ignore_302_redirects: false)
-      object.respond_to?(:url) ? @object = object : raise(ArgumentError.new("object doesn't respond to url"))
+      @object = object
 
       @ignore_trailing_slash_redirects = ignore_trailing_slash_redirects || self.class.ignore_trailing_slash_redirects
       @ignore_302_redirects = ignore_302_redirects || self.class.ignore_302_redirects
@@ -44,7 +44,7 @@ module Kauperts
     # Checks the associated url object. Sets and returns +status+
     def check!
       begin
-        uri = parsed_uri(@object.url)
+        uri = parsed_uri(@object)
         if uri.scheme == 'https'
           http = Net::HTTP.new(uri.host , 443)
           http.use_ssl = true

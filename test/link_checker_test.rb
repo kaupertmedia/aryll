@@ -3,7 +3,7 @@ require 'test_helper'
 describe Kauperts::LinkChecker do
 
   let(:url_object) do
-    Class.new { def url; 'http://www.example.com' end }.new
+    'http://www.example.com'
   end
 
   subject { described_class.new url_object }
@@ -44,16 +44,6 @@ describe Kauperts::LinkChecker do
   end
 
   describe 'its constructor' do
-    let(:url_object) { Class.new { attr_reader :url }.new }
-
-    it 'accepts objects responding to "url"' do
-      described_class.new(url_object).must_be_instance_of described_class
-    end
-
-    it 'raises an ArgumentError if object does not respond to "url"' do
-      -> { described_class.new(Object.new) }.must_raise ArgumentError
-    end
-
     it 'sets the url object' do
       subject.object.must_equal url_object
     end
@@ -86,7 +76,7 @@ describe Kauperts::LinkChecker do
 
     describe 'with SSL' do
       let(:url_object) do
-        Class.new { def url; 'https://www.example.com/' end }.new
+        'https://www.example.com/'
       end
 
       it "returns a '200' status" do
@@ -97,7 +87,7 @@ describe Kauperts::LinkChecker do
 
     describe 'with configuration options' do
       describe 'for trailing slashes' do
-        before { stub_net_http_redirect!("301", location: url_object.url + '/') }
+        before { stub_net_http_redirect!("301", location: url_object + '/') }
 
         it 'considers trailing slashes for redirects not ok by default' do
           subject.check!
@@ -177,7 +167,7 @@ describe Kauperts::LinkChecker do
 
     describe 'with IDN domains' do
       let(:url_object) do
-        Class.new { def url; 'http://www.trotzköpfchen.de' end }.new
+        'http://www.trotzköpfchen.de'
       end
 
       before do
