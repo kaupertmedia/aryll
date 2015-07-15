@@ -24,6 +24,13 @@ module Kauperts
       def configure
         yield self
       end
+
+      # Immediately checks +url+ and returns the LinkChecker instance
+      def check!(url, options = {})
+        checker = new(url, options)
+        checker.check!
+        checker
+      end
     end
 
     attr_reader :url, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects
@@ -71,13 +78,6 @@ module Kauperts
 
     def uri
       @uri ||= InternationalURI(url)
-    end
-
-    # Immediately checks +url+ and returns the LinkChecker instance
-    def self.check!(url, options = {})
-      checker = new(url, options)
-      checker.check!
-      checker
     end
 
     private
