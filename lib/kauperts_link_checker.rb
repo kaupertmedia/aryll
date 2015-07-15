@@ -17,7 +17,7 @@ module Kauperts
   # * <tt>kauperts.link_checker.status.redirect_permanently</tt>: translation for 301 permanent redirects
   class LinkChecker
 
-    class ParsedURI < Struct.new(:url)
+    class InternationalURI < Struct.new(:url)
       def domain
         @domain ||= url_without_protocol.split('/', 2)[0]
       end
@@ -37,8 +37,8 @@ module Kauperts
       end
     end
 
-    def ParsedURI(url)
-      ParsedURI.new(url).to_uri
+    def InternationalURI(url)
+      InternationalURI.new(url).to_uri
     end
 
     class << self
@@ -114,7 +114,7 @@ module Kauperts
     # Transforms a possible IDN within +url+ into ASCII and returns
     # a parsed URI instance.
     def parsed_uri(url)
-      ParsedURI(url)
+      InternationalURI(url)
     end
 
   end
