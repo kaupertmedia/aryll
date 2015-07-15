@@ -25,12 +25,7 @@ module Kauperts
       end
     end
 
-    attr_reader :configuration, :object, :status
-
-    class Configuration < Struct.new(
-      :ignore_trailing_slash_redirects,
-      :ignore_302_redirects
-    ); end
+    attr_reader :object, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects
 
     # === Parameters
     # * +object+: an arbitrary object which responds to +url+.
@@ -38,14 +33,11 @@ module Kauperts
     #
     # === Available Options
     # * +ignore_trailing_slash_redirects+: ignores redirects to the same URI but only with an added trailing slash (default: false)
-    def initialize(object, options = {})
+    def initialize(object, ignore_trailing_slash_redirects: false, ignore_302_redirects: false)
       object.respond_to?(:url) ? @object = object : raise(ArgumentError.new("object doesn't respond to url"))
 
-      # Assign config variables
-      @configuration = Configuration.new
-      options = { :ignore_trailing_slash_redirects => false, :ignore_302_redirects => false }.merge(options).each do |key, val|
-        @configuration.send(:"#{key}=", val)
-      end
+      @ignore_trailing_slash_redirects = ignore_trailing_slash_redirects
+      @ignore_302_redirects = ignore_302_redirects
 
     end
 
@@ -80,8 +72,8 @@ module Kauperts
     # while +ignore_trailing_slash_redirects+ has been set to true
     def ok?
       return true if @status == '200'
-      return true if (@status == '302' and self.configuration.ignore_302_redirects)
-      return true if (@redirect_with_trailing_slash_only == true and self.configuration.ignore_trailing_slash_redirects)
+      return true if (@status == '302' and ignore_302_redirects)
+      return true if (@redirect_with_trailing_slash_only == true and ignore_trailing_slash_redirects)
 
       false
     end
