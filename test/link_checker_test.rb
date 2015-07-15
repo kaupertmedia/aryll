@@ -2,11 +2,11 @@ require 'test_helper'
 
 describe Kauperts::LinkChecker do
 
-  let(:url_object) do
+  let(:url) do
     'http://www.example.com'
   end
 
-  subject { described_class.new url_object }
+  subject { described_class.new url }
 
   let(:translation) { {} }
 
@@ -45,7 +45,7 @@ describe Kauperts::LinkChecker do
 
   describe 'its constructor' do
     it 'sets the url object' do
-      subject.object.must_equal url_object
+      subject.object.must_equal url
     end
   end
 
@@ -57,7 +57,7 @@ describe Kauperts::LinkChecker do
     before { request_stub }
 
     it 'returns a link checker instance' do
-      subject = described_class.check!(url_object)
+      subject = described_class.check!(url)
       subject.must_be_instance_of described_class
       assert_requested request_stub
     end
@@ -75,7 +75,7 @@ describe Kauperts::LinkChecker do
     end
 
     describe 'with SSL' do
-      let(:url_object) do
+      let(:url) do
         'https://www.example.com/'
       end
 
@@ -87,7 +87,7 @@ describe Kauperts::LinkChecker do
 
     describe 'with configuration options' do
       describe 'for trailing slashes' do
-        before { stub_net_http_redirect!("301", location: url_object + '/') }
+        before { stub_net_http_redirect!("301", location: url + '/') }
 
         it 'considers trailing slashes for redirects not ok by default' do
           subject.check!
@@ -95,7 +95,7 @@ describe Kauperts::LinkChecker do
         end
 
         it 'ignores permanent redirects with trailing slash' do
-          subject = described_class.new(url_object, ignore_trailing_slash_redirects: true )
+          subject = described_class.new(url, ignore_trailing_slash_redirects: true )
           subject.check!
           subject.ok?.must_equal true
         end
@@ -112,7 +112,7 @@ describe Kauperts::LinkChecker do
         end
 
         it 'ignores temporary redirects' do
-          subject = described_class.new(url_object, ignore_302_redirects: true)
+          subject = described_class.new(url, ignore_302_redirects: true)
           subject.check!
           subject.ok?.must_equal true
         end
@@ -166,7 +166,7 @@ describe Kauperts::LinkChecker do
     end
 
     describe 'with IDN domains' do
-      let(:url_object) do
+      let(:url) do
         'http://www.trotzköpfchen.de'
       end
 
