@@ -37,6 +37,10 @@ module Kauperts
       end
     end
 
+    def ParsedURI(url)
+      ParsedURI.new(url).to_uri
+    end
+
     class << self
       attr_accessor :ignore_trailing_slash_redirects, :ignore_302_redirects
 
@@ -110,7 +114,7 @@ module Kauperts
     # Transforms a possible IDN within +url+ into ASCII and returns
     # a parsed URI instance.
     def parsed_uri(url)
-      ParsedURI.new(url).to_uri
+      ParsedURI(url)
     end
 
   end
