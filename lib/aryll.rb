@@ -5,6 +5,15 @@ require 'aryll/status_message'
 
 module Aryll
 
+  # Immediately checks +url+ and returns the LinkChecker instance
+  def check!(url, options = {})
+    checker = LinkChecker.new(url, options)
+    checker.check!
+    checker
+  end
+
+  module_function :check!
+
   # Checks the status of a web address. The returned status can be accessed via
   # +status+. It contains either a string representation of a numeric http
   # status code or an error message.
@@ -25,12 +34,6 @@ module Aryll
         yield self
       end
 
-      # Immediately checks +url+ and returns the LinkChecker instance
-      def check!(url, options = {})
-        checker = new(url, options)
-        checker.check!
-        checker
-      end
     end
 
     attr_reader :url, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects,
