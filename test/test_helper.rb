@@ -9,7 +9,7 @@ require 'minitest/autorun'
 require 'minitest/pride'
 require 'webmock/minitest'
 
-require 'kauperts_link_checker'
+require 'aryll'
 
 I18n.available_locales = :en
 

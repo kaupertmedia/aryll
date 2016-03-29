@@ -1,10 +1,4 @@
-require "net/https"
-require "simpleidn"
-require 'kauperts_link_checker/international_uri'
-require 'kauperts_link_checker/status_message'
-
-module Kauperts
-
+module Aryll
   # Checks the status of a web address. The returned status can be accessed via
   # +status+. It contains either a string representation of a numeric http
   # status code or an error message.
@@ -25,15 +19,10 @@ module Kauperts
         yield self
       end
 
-      # Immediately checks +url+ and returns the LinkChecker instance
-      def check!(url, options = {})
-        checker = new(url, options)
-        checker.check!
-        checker
-      end
     end
 
-    attr_reader :url, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects
+    attr_reader :url, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects,
+      :open_timeout, :read_timeout, :user_agent
 
     # === Parameters
     # * +url+: URL, complete with protocol scheme
@@ -42,12 +31,15 @@ module Kauperts
     # === Available Options
     # * +ignore_trailing_slash_redirects+: ignores redirects to the same URI but only with an added trailing slash (default: false)
     # * +ignore_302_redirects+: ignores temporary redirects (default: false)
-    def initialize(url, ignore_trailing_slash_redirects: false, ignore_302_redirects: false)
+    # * +open_timeout+: Passed to Net::HTTP#open_timeout
+    # * +read_timeout+: Passed to Net::HTTP#read_timeout
+    def initialize(url, ignore_trailing_slash_redirects: false, ignore_302_redirects: false, open_timeout: 5, read_timeout: 10, user_agent: "Aryll Spider v#{Aryll::VERSION} (https://github.com/kaupertmedia/aryll)".freeze)
       @url = url
 
       @ignore_trailing_slash_redirects = ignore_trailing_slash_redirects || self.class.ignore_trailing_slash_redirects
       @ignore_302_redirects = ignore_302_redirects || self.class.ignore_302_redirects
-
+      @open_timeout, @read_timeout = open_timeout, read_timeout
+      @user_agent = user_agent
     end
 
     # Checks the associated url. Sets and returns +status+
@@ -82,16 +74,16 @@ module Kauperts
     private
 
     def response
-      @response ||= if uri.scheme == 'https'
-                      http = Net::HTTP.new(uri.host , 443)
-                      http.use_ssl = true
-                      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-                      http.start{ http.get2(uri.to_s) }
-                    else
-                      Net::HTTP.get_response(uri)
+      @response ||= begin
+                      https_opts = { use_ssl: uri.scheme == 'https', verify_mode: OpenSSL::SSL::VERIFY_NONE }
+                      Net::HTTP.start(uri.host, uri.port, https_opts) do |http|
+                        request = Net::HTTP::Get.new uri, 'User-Agent' => user_agent
+                        http.open_timeout = open_timeout
+                        http.read_timeout = read_timeout
+                        http.request request
+                      end
                     end
     end
 
   end
 end
-

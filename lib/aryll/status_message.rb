@@ -1,6 +1,6 @@
 require 'i18n'
 
-module Kauperts
+module Aryll
   class LinkChecker
 
     class StatusMessage

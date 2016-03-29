@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'kauperts_link_checker/version'
+require 'aryll/version'
 
 Gem::Specification.new do |s|
-  s.name          = "kauperts_link_checker"
-  s.version       = Kauperts::LinkChecker::VERSION
+  s.name          = "aryll"
+  s.version       = Aryll::VERSION
   s.platform      = Gem::Platform::RUBY
   s.authors       = ["Wolfgang Vogl", "Carsten Zimmermann", "Matthias Viehweger"]
   s.email         = ["cz@aegisnet.de"]
@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.require_paths = ["lib"]
-  s.required_ruby_version = '>= 2.0'
+  s.required_ruby_version = '>= 2.2'
 
   s.add_dependency "i18n"
   s.add_dependency "simpleidn"

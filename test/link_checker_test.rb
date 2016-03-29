@@ -1,6 +1,6 @@
 require 'test_helper'
 
-describe Kauperts::LinkChecker do
+describe Aryll::LinkChecker do
 
   let(:url) do
     'http://www.example.com'
@@ -46,20 +46,6 @@ describe Kauperts::LinkChecker do
   describe 'its constructor' do
     it 'sets the url object' do
       subject.url.must_equal url
-    end
-  end
-
-  describe '.check!' do
-    it { described_class.method(:check!).arity.must_equal(-2) }
-
-    let(:request_stub) { stub_net_http! }
-
-    before { request_stub }
-
-    it 'returns a link checker instance' do
-      subject = described_class.check!(url)
-      subject.must_be_instance_of described_class
-      assert_requested request_stub
     end
   end
 
@@ -207,7 +193,7 @@ describe Kauperts::LinkChecker do
   end
 
   def described_class
-    Kauperts::LinkChecker
+    Aryll::LinkChecker
   end
 
   def stub_net_http!(return_code = "200", host: 'www.example.com', path: '/', protocol: 'http')

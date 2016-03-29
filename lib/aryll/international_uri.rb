@@ -1,4 +1,4 @@
-module Kauperts
+module Aryll
   class LinkChecker
 
     class InternationalURI < Struct.new(:url)
