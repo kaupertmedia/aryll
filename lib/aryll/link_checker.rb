@@ -22,7 +22,7 @@ module Aryll
     end
 
     attr_reader :url, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects,
-      :open_timeout, :read_timeout
+      :open_timeout, :read_timeout, :user_agent
 
     # === Parameters
     # * +url+: URL, complete with protocol scheme
@@ -33,12 +33,13 @@ module Aryll
     # * +ignore_302_redirects+: ignores temporary redirects (default: false)
     # * +open_timeout+: Passed to Net::HTTP#open_timeout
     # * +read_timeout+: Passed to Net::HTTP#read_timeout
-    def initialize(url, ignore_trailing_slash_redirects: false, ignore_302_redirects: false, open_timeout: 5, read_timeout: 10)
+    def initialize(url, ignore_trailing_slash_redirects: false, ignore_302_redirects: false, open_timeout: 5, read_timeout: 10, user_agent: "Aryll Spider v#{Aryll::VERSION} (https://github.com/kaupertmedia/aryll)".freeze)
       @url = url
 
       @ignore_trailing_slash_redirects = ignore_trailing_slash_redirects || self.class.ignore_trailing_slash_redirects
       @ignore_302_redirects = ignore_302_redirects || self.class.ignore_302_redirects
       @open_timeout, @read_timeout = open_timeout, read_timeout
+      @user_agent = user_agent
     end
 
     # Checks the associated url. Sets and returns +status+
@@ -76,7 +77,7 @@ module Aryll
       @response ||= begin
                       https_opts = { use_ssl: uri.scheme == 'https', verify_mode: OpenSSL::SSL::VERIFY_NONE }
                       Net::HTTP.start(uri.host, uri.port, https_opts) do |http|
-                        request = Net::HTTP::Get.new uri
+                        request = Net::HTTP::Get.new uri, 'User-Agent' => user_agent
                         http.open_timeout = open_timeout
                         http.read_timeout = read_timeout
                         http.request request
