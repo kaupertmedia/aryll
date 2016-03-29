@@ -33,7 +33,8 @@ module Aryll
       end
     end
 
-    attr_reader :url, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects
+    attr_reader :url, :status, :ignore_trailing_slash_redirects, :ignore_302_redirects,
+      :open_timeout, :read_timeout
 
     # === Parameters
     # * +url+: URL, complete with protocol scheme
@@ -42,12 +43,14 @@ module Aryll
     # === Available Options
     # * +ignore_trailing_slash_redirects+: ignores redirects to the same URI but only with an added trailing slash (default: false)
     # * +ignore_302_redirects+: ignores temporary redirects (default: false)
-    def initialize(url, ignore_trailing_slash_redirects: false, ignore_302_redirects: false)
+    # * +open_timeout+: Passed to Net::HTTP#open_timeout
+    # * +read_timeout+: Passed to Net::HTTP#read_timeout
+    def initialize(url, ignore_trailing_slash_redirects: false, ignore_302_redirects: false, open_timeout: 5, read_timeout: 10)
       @url = url
 
       @ignore_trailing_slash_redirects = ignore_trailing_slash_redirects || self.class.ignore_trailing_slash_redirects
       @ignore_302_redirects = ignore_302_redirects || self.class.ignore_302_redirects
-
+      @open_timeout, @read_timeout = open_timeout, read_timeout
     end
 
     # Checks the associated url. Sets and returns +status+
@@ -86,9 +89,16 @@ module Aryll
                       http = Net::HTTP.new(uri.host , 443)
                       http.use_ssl = true
                       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+                      http.open_timeout = open_timeout
+                      http.read_timeout = read_timeout
                       http.start{ http.get2(uri.to_s) }
                     else
-                      Net::HTTP.get_response(uri)
+                      Net::HTTP.start(uri.host, uri.port) do |http|
+                        request = Net::HTTP::Get.new uri
+                        http.open_timeout = open_timeout
+                        http.read_timeout = read_timeout
+                        http.request request
+                      end
                     end
     end
 
