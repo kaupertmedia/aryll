@@ -1,6 +1,6 @@
 require 'test_helper'
 
-describe Kauperts::LinkChecker do
+describe Aryll::LinkChecker do
 
   let(:url) do
     'http://www.example.com'
@@ -207,7 +207,7 @@ describe Kauperts::LinkChecker do
   end
 
   def described_class
-    Kauperts::LinkChecker
+    Aryll::LinkChecker
   end
 
   def stub_net_http!(return_code = "200", host: 'www.example.com', path: '/', protocol: 'http')

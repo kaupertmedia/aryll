@@ -1,5 +1,3 @@
-module Kauperts
-  class LinkChecker
-    VERSION = '1.0.0.pre'
-  end
+module Aryll
+  VERSION = '1.0.0.pre'
 end

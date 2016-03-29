@@ -1,9 +1,9 @@
 require "net/https"
 require "simpleidn"
-require 'kauperts_link_checker/international_uri'
-require 'kauperts_link_checker/status_message'
+require 'aryll/international_uri'
+require 'aryll/status_message'
 
-module Kauperts
+module Aryll
 
   # Checks the status of a web address. The returned status can be accessed via
   # +status+. It contains either a string representation of a numeric http
