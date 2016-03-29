@@ -73,15 +73,9 @@ module Aryll
     private
 
     def response
-      @response ||= if uri.scheme == 'https'
-                      http = Net::HTTP.new(uri.host , 443)
-                      http.use_ssl = true
-                      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-                      http.open_timeout = open_timeout
-                      http.read_timeout = read_timeout
-                      http.start{ http.get2(uri.to_s) }
-                    else
-                      Net::HTTP.start(uri.host, uri.port) do |http|
+      @response ||= begin
+                      https_opts = { use_ssl: uri.scheme == 'https', verify_mode: OpenSSL::SSL::VERIFY_NONE }
+                      Net::HTTP.start(uri.host, uri.port, https_opts) do |http|
                         request = Net::HTTP::Get.new uri
                         http.open_timeout = open_timeout
                         http.read_timeout = read_timeout
