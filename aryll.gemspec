@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'kauperts_link_checker/version'
+require 'aryll/version'
 
 Gem::Specification.new do |s|
-  s.name          = "kauperts_link_checker"
-  s.version       = Kauperts::LinkChecker::VERSION
+  s.name          = "aryll"
+  s.version       = Aryll::VERSION
   s.platform      = Gem::Platform::RUBY
   s.authors       = ["Wolfgang Vogl", "Carsten Zimmermann", "Matthias Viehweger"]
   s.email         = ["cz@aegisnet.de"]
