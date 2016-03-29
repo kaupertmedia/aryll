@@ -1,12 +1,12 @@
-# Kauperts::LinkChecker [![Build Status](https://travis-ci.org/kaupertmedia/kauperts_link_checker.svg?branch=master)](https://travis-ci.org/kaupertmedia/kauperts_link_checker)
+# Aryll [![Build Status](https://travis-ci.org/kaupertmedia/kauperts_link_checker.svg?branch=master)](https://travis-ci.org/kaupertmedia/kauperts_link_checker)
 
-**Kauperts::LinkChecker** is a simple library to check for the well-being of URLs. It supports HTTPS and IDN URIs.
+**Aryll** is a simple library to check for the well-being of URLs. It supports HTTPS and IDN URIs.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 ```
- gem 'kauperts_link_checker'
+ gem 'aryll'
 ```
 
 And then execute:
@@ -16,13 +16,13 @@ And then execute:
 
 Or install it yourself as:
 ```
- $ gem install kauperts_link_checker
+ $ gem install aryll
 ```
 
 ## Usage
 It will check any object that responds to `url`:
 ```ruby
-  status = Kauperts::LinkChecker.check!(object_responding_to_url)
+  status = Aryll.check!(my_url)
   unless status.ok?
     puts status
   end
@@ -30,7 +30,7 @@ It will check any object that responds to `url`:
 
 You can ignore 301 permanent redirect that only add a trailing slash like this:
 ```ruby
-  status = Kauperts::LinkChecker.check!(object_responding_to_url, :ignore_trailing_slash_redirects => true)
+  status = Aryll::LinkChecker.check!(url, ignore_trailing_slash_redirects: true)
   unless status.ok?
     # A redirect from http://example.com/foo to http://example.com/foo/ will be considered ok
   end
@@ -43,9 +43,9 @@ The following keys are used to translate error messages using the I18n gem:
 * `kauperts.link_checker.errors.generic_network`: message when (currently) rescueing from all other exceptions
 
 ## Credits
-**Kauperts::LinkChecker** is extracted from a maintenance task made for
-[berlin.kauperts.de](http://berlin.kauperts.de) by [kaupert media gmbh](http://kaupertmedia.de).
+**Aryll** is extracted from a maintenance task made for
+[berlin.kauperts.de](https://berlin.kauperts.de) by [kaupert media gmbh](http://kaupertmedia.de).
 
 ## License
-**Kauperts::LinkChecker** is released under a 3-clause BSD-licence. See the LICENSE file for details.
+**Aryll** is released under a 3-clause BSD-licence. See the LICENSE file for details.
 
