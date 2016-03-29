@@ -7,8 +7,8 @@ require 'aryll/status_message'
 module Aryll
 
   # Immediately checks +url+ and returns the LinkChecker instance
-  def check!(url, options = {})
-    checker = LinkChecker.new(url, options)
+  def check!(url, **options)
+    checker = LinkChecker.new(url, **options)
     checker.check!
     checker
   end
