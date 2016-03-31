@@ -1,5 +1,6 @@
 require "net/https"
 require "simpleidn"
+require 'aryll/version'
 require 'aryll/link_checker'
 require 'aryll/international_uri'
 require 'aryll/status_message'
